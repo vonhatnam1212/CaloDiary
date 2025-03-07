@@ -14,6 +14,8 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
+            android:textColor="@color/green"
+            android:textSize="25sp"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:title="Cài đặt"/>
 
@@ -30,7 +32,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Đăng xuất"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+            android:background="@drawable/rounded_corner_btn_regis"
+            android:textColor="@color/green"
+            android:textSize="25sp"
+            android:fontFamily="@font/glacial_indifference_bold"
+            android:layout_marginTop="160dp"
+            />
 
     </LinearLayout>
 </LinearLayout> 
