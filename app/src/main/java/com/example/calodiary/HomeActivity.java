@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
@@ -28,9 +29,12 @@ public class HomeActivity extends AppCompatActivity {
         CardView cvCalendar = findViewById(R.id.cvCalendar);
         CardView cvProfile = findViewById(R.id.cvProfile);
 
-        cvCalorie.setOnClickListener(v -> {
-//            Intent intent = new Intent(HomeActivity.this, CalorieCalculatorActivity.class);
-//            startActivity(intent);
+        cvCalorie.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(HomeActivity.this, BodyIndexActivity.class);
+                startActivity(intent);
+            }
         });
 
         cvFood.setOnClickListener(v -> {
@@ -43,8 +47,12 @@ public class HomeActivity extends AppCompatActivity {
 //            startActivity(intent);
         });
 
-        cvProfile.setOnClickListener(v -> {
-            // TODO: Thêm ProfileActivity sau
+        cvProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(HomeActivity.this, ProfileActivity.class);
+                startActivity(intent);
+            }
         });
     }
 
