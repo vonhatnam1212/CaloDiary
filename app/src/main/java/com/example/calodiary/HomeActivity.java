@@ -28,20 +28,20 @@ public class HomeActivity extends AppCompatActivity {
         CardView cvCalendar = findViewById(R.id.cvCalendar);
         CardView cvProfile = findViewById(R.id.cvProfile);
 
-//        cvCalorie.setOnClickListener(v -> {
+        cvCalorie.setOnClickListener(v -> {
 //            Intent intent = new Intent(HomeActivity.this, CalorieCalculatorActivity.class);
 //            startActivity(intent);
-//        });
-//
-//        cvFood.setOnClickListener(v -> {
+        });
+
+        cvFood.setOnClickListener(v -> {
 //            Intent intent = new Intent(HomeActivity.this, FoodUpdateActivity.class);
 //            startActivity(intent);
-//        });
-//
-//        cvCalendar.setOnClickListener(v -> {
+        });
+
+        cvCalendar.setOnClickListener(v -> {
 //            Intent intent = new Intent(HomeActivity.this, CalendarActivity.class);
 //            startActivity(intent);
-//        });
+        });
 
         cvProfile.setOnClickListener(v -> {
             // TODO: Thêm ProfileActivity sau
