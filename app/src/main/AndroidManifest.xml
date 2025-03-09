@@ -13,8 +13,14 @@
         android:theme="@style/Theme.CaloDiary"
         tools:targetApi="31">
         <activity
-            android:name=".DisplayCreatedPostActivity"
+            android:name=".ViewDetailPostActivity"
             android:exported="false" />
+        <activity
+            android:name=".UploadPostActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DisplayCreatedPostActivity"
+            android:exported="true" />
         <activity
             android:name=".Login"
             android:exported="false" />
