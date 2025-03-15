@@ -47,9 +47,12 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
-        cvCalendar.setOnClickListener(v -> {
-//            Intent intent = new Intent(HomeActivity.this, CalendarActivity.class);
-//            startActivity(intent);
+        cvCalendar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(HomeActivity.this, CalendarActivity.class);
+                startActivity(intent);
+            }
         });
 
         cvProfile.setOnClickListener(new View.OnClickListener() {

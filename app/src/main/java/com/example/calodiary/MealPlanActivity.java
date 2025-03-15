@@ -23,7 +23,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.text.SimpleDateFormat;
 
 public class MealPlanActivity extends AppCompatActivity{
     private TextView tvDailyCalories;
@@ -187,8 +190,12 @@ public class MealPlanActivity extends AppCompatActivity{
                 jsonObject.put("portion", meal.portion);
                 jsonArray.put(jsonObject);
             }
+            
+            // Lưu cho ngày hiện tại
+            String today = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                .format(new Date());
             sharedPreferences.edit()
-                .putString("meals", jsonArray.toString())
+                .putString("meals_" + today, jsonArray.toString())
                 .apply();
         } catch (JSONException e) {
             e.printStackTrace();

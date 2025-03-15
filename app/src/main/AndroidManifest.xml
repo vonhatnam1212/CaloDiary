@@ -38,6 +38,10 @@
         <activity
             android:name=".MealPlanActivity"
             android:label="Thực đơn"/>
+        <activity
+            android:name=".CalendarActivity"
+            android:label="Lịch"/>
+
     </application>
 
 </manifest>
