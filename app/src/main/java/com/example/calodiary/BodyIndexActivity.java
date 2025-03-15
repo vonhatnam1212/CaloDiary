@@ -194,7 +194,7 @@ public class BodyIndexActivity extends AppCompatActivity {
                    "BMI: %.2f\nPhân loại: %s\nLượng calo cần thiết: %.0f kcal/ngày",
                    bmi, category, tdee))
                .setPositiveButton("Lập thực đơn", (dialog, which) -> {
-                   Intent intent = new Intent(BodyIndexActivity.this, MealPlanActivity.class);
+                   Intent intent = new Intent( BodyIndexActivity.this, MealPlanActivity.class);
                    startActivity(intent);
                })
                .setNegativeButton("Đóng", null)

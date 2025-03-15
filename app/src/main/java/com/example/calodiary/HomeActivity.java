@@ -1,5 +1,6 @@
 package com.example.calodiary;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import androidx.cardview.widget.CardView;
 
 public class HomeActivity extends AppCompatActivity {
     
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,9 +39,12 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
-        cvFood.setOnClickListener(v -> {
-//            Intent intent = new Intent(HomeActivity.this, FoodUpdateActivity.class);
-//            startActivity(intent);
+        cvFood.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(HomeActivity.this, MealPlanActivity.class);
+                startActivity(intent);
+            }
         });
 
         cvCalendar.setOnClickListener(v -> {

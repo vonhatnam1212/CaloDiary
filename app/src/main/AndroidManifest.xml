@@ -19,12 +19,6 @@
             android:name=".HomeActivity" />
         <activity
             android:name=".MainActivity" />
-<!--        <activity-->
-<!--            android:name=".CalorieCalculatorActivity" />-->
-<!--        <activity-->
-<!--            android:name=".FoodUpdateActivity" />-->
-<!--        <activity-->
-<!--            android:name=".CalendarActivity" />-->
         <activity
             android:name=".SplashActivity"
             android:exported="true"
@@ -41,6 +35,9 @@
         <activity
             android:name=".BodyIndexActivity"
             android:label="Tính chỉ số cơ thể"/>
+        <activity
+            android:name=".MealPlanActivity"
+            android:label="Thực đơn"/>
     </application>
 
 </manifest>

@@ -1,46 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/tvDailyCalories"
+    <!-- Header -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Lượng calo cần thiết: 0 kcal"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="16dp"/>
+        android:background="@color/purple_500"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <TextView
-        android:id="@+id/tvRemainingCalories"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Còn lại: 0 kcal"
-        android:textSize="16sp"
-        android:layout_marginBottom="24dp"/>
+        <TextView
+            android:id="@+id/tvDailyCalories"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Lượng calo cần thiết: 0 kcal"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
 
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:contentDescription="Chọn bữa ăn"
-        app:tabMode="fixed"
-        app:tabGravity="fill"/>
+        <TextView
+            android:id="@+id/tvRemainingCalories"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Còn lại: 0 kcal"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:layout_marginTop="8dp"/>
+    </LinearLayout>
 
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/viewPager"
+    <!-- Meal List -->
+    <ListView
+        android:id="@+id/listViewMeals"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="1dp"
+        android:padding="8dp"/>
 
+    <!-- Add Meal Button -->
     <Button
         android:id="@+id/btnAddMeal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Thêm món ăn"
-        android:layout_marginTop="16dp"/>
+        android:layout_margin="16dp"/>
+
 </LinearLayout> 
