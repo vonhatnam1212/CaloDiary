@@ -17,7 +17,7 @@
         android:textSize="24sp"
         android:layout_gravity="center"
         android:layout_marginBottom="12dp"
-        android:textColor="@color/lavender"/>
+        android:textColor="@color/lavender1"/>
 
     <ImageView
         android:layout_width="400dp"
@@ -35,7 +35,7 @@
         android:layout_height="wrap_content"
         android:hint="Created At"
         android:textSize="16sp"
-        android:textColor="@color/lavender"
+        android:textColor="@color/lavender1"
         android:textColorHint="@android:color/darker_gray"
         android:padding="12dp"
 
@@ -49,7 +49,7 @@
         android:layout_height="wrap_content"
         android:hint="Updated At"
         android:textSize="16sp"
-        android:textColor="@color/lavender"
+        android:textColor="@color/lavender1"
         android:textColorHint="@android:color/darker_gray"
         android:padding="12dp"
 
@@ -65,14 +65,14 @@
         android:layout_gravity="center"
         android:id="@+id/content"
         android:textSize="18dp"
-        android:textColor="@color/lavender" />
+        android:textColor="@color/lavender1" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:backgroundTint="@color/lavender"
+            android:backgroundTint="@color/lavender1"
             android:id="@+id/rejectButton"
             android:src="@drawable/baseline_auto_delete_24"
             android:layout_width="wrap_content"
@@ -84,7 +84,7 @@
             app:layout_constraintStart_toStartOf="parent" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:backgroundTint="@color/lavender"
+            android:backgroundTint="@color/lavender1"
             android:id="@+id/acceptButton"
             android:src="@drawable/baseline_done_24"
             android:layout_width="wrap_content"
@@ -96,7 +96,7 @@
             app:layout_constraintStart_toStartOf="parent" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:backgroundTint="@color/lavender"
+            android:backgroundTint="@color/lavender1"
             android:id="@+id/updateButton"
             android:src="@drawable/baseline_create_24"
             android:layout_width="wrap_content"
