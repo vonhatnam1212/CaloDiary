@@ -34,6 +34,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -132,36 +133,32 @@ public class UpdatePostActivity extends AppCompatActivity {
         updateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(selectedImageUri == null) {
-                    Toast.makeText(UpdatePostActivity.this, "Please select image", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                String content = updateContent.getText().toString();
-                String title = updateTitle.getText().toString();
+
+                String content = updateContent.getText().toString().trim();
+                String title = updateTitle.getText().toString().trim();
                 post.setContent(content);
                 post.setTitle(title);
-                String imgPath = selectedImageUri != null ? selectedImageUri.toString() : null;
+                post.setUpdatedAt(new Timestamp(new java.util.Date()));
 
-                Date currentTime = new Date();
-                post.setUpdatedAt(DATE_FORMAT.format(currentTime));
+                if (selectedImageUri != null) {
+                    try {
+                        Bitmap bitmap= MediaStore.Images.Media.getBitmap(getContentResolver(),selectedImageUri);
 
-                try {
-                    Bitmap bitmap= MediaStore.Images.Media.getBitmap(getContentResolver(),selectedImageUri);
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
-                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        bitmap.compress(Bitmap.CompressFormat.JPEG,100,stream);
 
-                    bitmap.compress(Bitmap.CompressFormat.JPEG,100,stream);
+                        byte[] bytes=stream.toByteArray();
 
-                    byte[] bytes=stream.toByteArray();
-
-                    imgPath = Base64.encodeToString(bytes,Base64.DEFAULT);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                        String imgPath = Base64.encodeToString(bytes,Base64.DEFAULT);
+                        post.setImg(imgPath);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
 
-                post.setImg(imgPath);
 
-                if (updateContent.getText().toString().trim().isEmpty() || updateTitle.getText().toString().trim().isEmpty()) {
+                if (content.isEmpty() || title.isEmpty()) {
                     Toast.makeText(UpdatePostActivity.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -180,7 +177,7 @@ public class UpdatePostActivity extends AppCompatActivity {
                         .addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                Log.w(TAG, "Error updating document", e);
+                                Toast.makeText(UpdatePostActivity.this, "Failed to update post", Toast.LENGTH_SHORT).show();
                             }
                         });
             }

@@ -27,6 +27,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.calodiary.Model.Posts;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -106,9 +107,7 @@ public class UploadPostActivity extends AppCompatActivity {
         String authorId = "1";
 
         String status = "pending";
-        Date currentTime = new Date();
-        String createdAtString = DATE_FORMAT.format(currentTime);
-        String updatedAtString = DATE_FORMAT.format(currentTime);
+        Timestamp currentTime = new Timestamp(new java.util.Date());
 
 
         try {
@@ -131,7 +130,7 @@ public class UploadPostActivity extends AppCompatActivity {
             return;
         }
 
-        Posts newPost = new Posts(title, content, authorId, status, imgPath, createdAtString, updatedAtString);
+        Posts newPost = new Posts(title, content, authorId, status, imgPath, currentTime, currentTime);
         newPost.setId(UUID.randomUUID().toString());
 
         db.collection("posts")

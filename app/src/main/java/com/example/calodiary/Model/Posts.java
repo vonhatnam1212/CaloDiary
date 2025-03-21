@@ -1,5 +1,7 @@
 package com.example.calodiary.Model;
 
+import com.google.firebase.Timestamp;
+
 import java.io.Serializable;
 
 
@@ -11,10 +13,10 @@ public class Posts implements Serializable {
     private String authorId;
     private String status; // 'pending', 'approved', 'rejected'
     private String img;
-    private String createdAt;
-    private String updatedAt;
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
 
-    public Posts(String title, String content, String authorId, String status, String img, String createdAt, String updatedAt) {
+    public Posts(String title, String content, String authorId, String status, String img, Timestamp createdAt, Timestamp updatedAt) {
         this.title = title;
         this.content = content;
         this.authorId = authorId;
@@ -75,19 +77,19 @@ public class Posts implements Serializable {
         this.img = img;
     }
 
-    public String getCreatedAt() {
+    public Timestamp getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(String createdAt) {
+    public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
 
-    public String getUpdatedAt() {
+    public Timestamp getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(String updatedAt) {
+    public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
     }
 }

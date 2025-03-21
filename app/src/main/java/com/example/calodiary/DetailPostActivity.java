@@ -31,6 +31,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 public class DetailPostActivity extends AppCompatActivity {
     private TextView detailTitle;
     private ImageView detailImage;
@@ -41,6 +44,7 @@ public class DetailPostActivity extends AppCompatActivity {
     private FloatingActionButton acceptButton, rejectButton, updateButton;
 
     private String documentId;
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,8 +122,8 @@ public class DetailPostActivity extends AppCompatActivity {
 
         detailTitle.setText(post.getTitle());
         content.setText(post.getContent());
-        createdAt.setText(post.getCreatedAt());
-        updatedAt.setText(post.getUpdatedAt());
+        createdAt.setText(DATE_FORMAT.format(post.getCreatedAt().toDate()));
+        updatedAt.setText(DATE_FORMAT.format(post.getUpdatedAt().toDate()));
     }
 
     private void updatePostStatus(String status) {

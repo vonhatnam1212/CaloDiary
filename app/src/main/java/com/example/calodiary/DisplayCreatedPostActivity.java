@@ -10,6 +10,7 @@ import android.view.View;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -30,9 +31,11 @@ import java.util.List;
 public class DisplayCreatedPostActivity extends AppCompatActivity {
     private FloatingActionButton fb;
     private RecyclerView recyclerView;
+    private SearchView searchView;
     private PostAdapter postAdapter;
     private FirebaseFirestore db;
     private List<Posts> postsList;
+    private List<Posts> searchList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,13 +44,14 @@ public class DisplayCreatedPostActivity extends AppCompatActivity {
 
         fb = findViewById(R.id.fb);
         recyclerView = findViewById(R.id.recycleView);
-
+        searchView = findViewById(R.id.search);
         db = FirebaseFirestore.getInstance();
         postsList = new ArrayList<>();
+        searchList = new ArrayList<>();
 
         loadPostsFromFirestore();
 
-        postAdapter = new PostAdapter(DisplayCreatedPostActivity.this, postsList);
+        postAdapter = new PostAdapter(DisplayCreatedPostActivity.this, searchList);
         recyclerView.setLayoutManager(new LinearLayoutManager(DisplayCreatedPostActivity.this));
         recyclerView.setAdapter(postAdapter);
 
@@ -58,7 +62,22 @@ public class DisplayCreatedPostActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                search(newText);
+                return true;
+            }
+        });
     }
+
+
 
     private void loadPostsFromFirestore() {
         db.collection("posts")
@@ -69,9 +88,11 @@ public class DisplayCreatedPostActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             postsList.clear();
+                            searchList.clear();
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 Posts post = document.toObject(Posts.class);
                                 postsList.add(post);
+                                searchList.add(post);
                             }
                             postAdapter.notifyDataSetChanged();
                         } else {
@@ -79,5 +100,20 @@ public class DisplayCreatedPostActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    private void search(String query) {
+        searchList.clear();
+        if (query.isEmpty()) {
+            searchList.addAll(postsList);
+        } else {
+            String queryLower = query.toLowerCase();
+            for (Posts post : postsList) {
+                if (post.getTitle().toLowerCase().contains(queryLower)) {
+                    searchList.add(post);
+                }
+            }
+        }
+        postAdapter.notifyDataSetChanged();
     }
 }
