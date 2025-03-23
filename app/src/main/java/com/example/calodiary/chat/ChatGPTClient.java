@@ -1,11 +1,13 @@
-package com.example.calodiary;
+package com.example.calodiary.chat;
 
 import okhttp3.*;
+
+import com.example.calodiary.BuildConfig;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonArray;
-import android.util.Log;
+
 public class ChatGPTClient {
     private static final String API_URL = "https://api.openai.com/v1/chat/completions";
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");

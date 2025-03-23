@@ -1,0 +1,17 @@
+buildscript {
+    repositories {
+        google()       // Required for Android Gradle Plugin
+        mavenCentral() // Fallback repository
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.1.0' // AGP version
+        classpath 'com.google.gms:google-services:4.4.2'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
