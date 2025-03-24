@@ -5,23 +5,35 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="center"
-    android:background="@drawable/calo_login"
-    android:padding="16dp"
-    tools:context=".MainActivity">
+    android:padding="20dp"
+    tools:context=".Login">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
         android:orientation="vertical"
-        android:layout_marginTop="200dp">
+        android:gravity="center_horizontal">
 
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_weight="1" />
 
-        <EditText
+        <ImageView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:src="@drawable/calo_logo"
+            android:scaleType="centerInside"
+            android:adjustViewBounds="true"
+            android:maxWidth="336dp"
+            android:maxHeight="180dp"
+            android:layout_marginBottom="32dp" />
+
+        <EditText
+            android:id="@+id/username_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:hint="Username"
             android:textColor="@color/gray"
             android:textColorHint="@color/gray"
@@ -29,32 +41,50 @@
             android:background="@drawable/rounded_corner_text"
             android:padding="23dp"
             android:inputType="text"
-            android:id="@+id/username_input" />
+            android:layout_marginBottom="16dp"
+            android:fontFamily="@font/glacial_indifference" />
 
-        <EditText
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="Password"
-            android:textColor="@color/gray"
-            android:textColorHint="@color/gray"
-            android:textSize="18sp"
-            android:background="@drawable/rounded_corner_text"
-            android:padding="23dp"
-            android:inputType="textPassword"
-            android:id="@+id/password_input" />
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/password_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Password"
+                android:textColor="@color/gray"
+                android:textColorHint="@color/gray"
+                android:textSize="18sp"
+                android:background="@drawable/rounded_corner_text"
+                android:padding="23dp"
+                android:inputType="textPassword"
+                android:layout_marginBottom="32dp"
+                android:letterSpacing="0"
+                android:fontFamily="@font/glacial_indifference" />
+
+            <ImageView
+                android:id="@+id/toggle_password"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/ic_visibility_off"
+                android:contentDescription="Toggle password visibility" />
+        </RelativeLayout>
 
         <Button
+            android:id="@+id/login_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Login"
             android:background="@drawable/rounded_corner_btn_login"
             android:textColor="@color/white"
             android:padding="5dp"
-            android:layout_marginTop="32dp"
             android:textSize="25sp"
-            android:id="@+id/login_btn"
-            android:fontFamily="@font/glacial_indifference"/>
+            android:fontFamily="@font/glacial_indifference"
+            android:layout_marginBottom="15dp" />
 
         <TextView
             android:id="@+id/fgp_btn"
@@ -62,27 +92,25 @@
             android:layout_height="wrap_content"
             android:text="Forgot password?"
             android:textColor="@drawable/fgp_text_color_selector"
-            android:layout_marginTop="15dp"
             android:padding="5dp"
             android:textSize="15sp"
             android:clickable="true"
             android:focusable="true"
-            android:fontFamily="@font/glacial_indifference_bold"/>
-
+            android:fontFamily="@font/glacial_indifference_bold"
+            android:layout_marginBottom="20dp" />
 
         <Button
+            android:id="@+id/registerNow"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Register"
             android:background="@drawable/rounded_corner_btn_regis"
             android:textColor="@color/green"
             android:padding="5dp"
-            android:layout_marginTop="160dp"
             android:textSize="25sp"
-            android:id="@+id/regis_btn"
             android:fontFamily="@font/glacial_indifference_bold"
-            />
+            android:layout_marginBottom="16dp" />
 
+        <!-- Rest of your layout remains unchanged -->
     </LinearLayout>
-
 </RelativeLayout>

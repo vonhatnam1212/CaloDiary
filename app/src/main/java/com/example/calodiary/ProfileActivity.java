@@ -25,8 +25,8 @@ public class ProfileActivity extends AppCompatActivity {
         sharedPreferences = getSharedPreferences("CaloDiaryPrefs", MODE_PRIVATE);
 
         // Setup toolbar
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+//        Toolbar toolbar = findViewById(R.id.toolbar); phuong nam
+//       setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Khởi tạo views
@@ -37,7 +37,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void initializeViews() {
-        btnLogout = findViewById(R.id.btnLogout);
+//        btnLogout = findViewById(R.id.btnLogout);
     }
 
     private void setupClickListeners() {
