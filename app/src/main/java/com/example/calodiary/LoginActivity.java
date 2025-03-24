@@ -139,6 +139,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         // Ngăn người dùng quay lại màn hình trước đó
+        super.onBackPressed();
         moveTaskToBack(true);
     }
 } 

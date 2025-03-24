@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.calodiary">
-
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -19,12 +19,6 @@
             android:name=".HomeActivity" />
         <activity
             android:name=".MainActivity" />
-<!--        <activity-->
-<!--            android:name=".CalorieCalculatorActivity" />-->
-<!--        <activity-->
-<!--            android:name=".FoodUpdateActivity" />-->
-<!--        <activity-->
-<!--            android:name=".CalendarActivity" />-->
         <activity
             android:name=".SplashActivity"
             android:exported="true"
@@ -41,6 +35,15 @@
         <activity
             android:name=".BodyIndexActivity"
             android:label="Tính chỉ số cơ thể"/>
-    </application>
+        <activity
+            android:name=".MealPlanActivity"
+            android:label="Thực đơn"/>
+        <activity
+            android:name=".CalendarActivity"
+            android:label="Lịch"/>
+        <activity
+            android:name=".ChatActivity"
+            android:label="Chat"/>
 
+    </application>
 </manifest>

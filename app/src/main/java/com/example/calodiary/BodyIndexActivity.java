@@ -1,5 +1,8 @@
 package com.example.calodiary;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -9,6 +12,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.text.DecimalFormat;
@@ -106,6 +110,7 @@ public class BodyIndexActivity extends AppCompatActivity {
         return true;
     }
 
+    @SuppressLint("SetTextI18n")
     private void calculateAndDisplayResults() {
         try {
             float weight = Float.parseFloat(etWeight.getText().toString());
@@ -160,8 +165,39 @@ public class BodyIndexActivity extends AppCompatActivity {
             // Show results
             resultLayout.setVisibility(View.VISIBLE);
 
+            // Lưu kết quả
+            SharedPreferences sharedPreferences = getSharedPreferences("CaloDiaryPrefs", MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putFloat("bmi", bmi);
+            editor.putString("bmiCategory", category);
+            editor.putFloat("dailyCalories", (float) tdee);
+            editor.putFloat("weight", weight);
+            editor.putFloat("height", height);
+            editor.putInt("age", age);
+            editor.putInt("activityLevel", activity);
+            editor.putBoolean("isMale", isMale);
+            editor.apply();
+
+            // Hiển thị dialog kết quả và chuyển hướng
+            showResultDialog(bmi, category, tdee);
+
         } catch (Exception e) {
             Toast.makeText(this, "Có lỗi xảy ra, vui lòng thử lại", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @SuppressLint("DefaultLocale")
+    private void showResultDialog(float bmi, String category, double tdee) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Kết quả tính toán")
+               .setMessage(String.format(
+                   "BMI: %.2f\nPhân loại: %s\nLượng calo cần thiết: %.0f kcal/ngày",
+                   bmi, category, tdee))
+               .setPositiveButton("Lập thực đơn", (dialog, which) -> {
+                   Intent intent = new Intent( BodyIndexActivity.this, MealPlanActivity.class);
+                   startActivity(intent);
+               })
+               .setNegativeButton("Đóng", null)
+               .show();
     }
 } 
