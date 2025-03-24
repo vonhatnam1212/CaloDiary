@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.calodiary">
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -28,11 +31,11 @@
             android:name=".DisplayCreatedPostActivity"
             android:exported="true" />
         <activity
-            android:name=".Login"
-            android:exported="false" />
+            android:name=".LoginActivity" />
         <activity
-            android:name=".MainActivity"
-            android:exported="false" />
+            android:name=".HomeActivity" />
+        <activity
+            android:name=".MainActivity" />
         <activity
             android:name=".SplashActivity"
             android:exported="true"

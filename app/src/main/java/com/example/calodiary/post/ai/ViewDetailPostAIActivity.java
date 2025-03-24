@@ -1,4 +1,4 @@
-package com.example.calodiary;
+package com.example.calodiary.post.ai;
 
 import android.os.Bundle;
 
@@ -8,12 +8,15 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class Login extends AppCompatActivity {
+import com.example.calodiary.R;
+
+public class ViewDetailPostAIActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_view_detail_post_ai);
 
     }
 }
