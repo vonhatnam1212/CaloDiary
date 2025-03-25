@@ -42,7 +42,7 @@ public class Register extends AppCompatActivity {
             dobError, heightError, weightError, genderError;
     RadioGroup radioGroupGender;
     Button buttonReg;
-    ImageButton buttonNow;
+    ImageButton backButton; // Chỉ giữ nút Back
     ImageView avatarImage, togglePassword, toggleConfirmPassword, dobPicker;
     FirebaseAuth mAuth;
     FirebaseFirestore db;
@@ -80,7 +80,7 @@ public class Register extends AppCompatActivity {
         editTextWeight = findViewById(R.id.weight_input);
         radioGroupGender = findViewById(R.id.radioGroup);
         buttonReg = findViewById(R.id.register_btn);
-        buttonNow = findViewById(R.id.loginNow);
+        backButton = findViewById(R.id.back_button); // Ánh xạ nút Back
         avatarImage = findViewById(R.id.avatar_image);
         togglePassword = findViewById(R.id.toggle_password);
         toggleConfirmPassword = findViewById(R.id.toggle_confirm_password);
@@ -178,7 +178,8 @@ public class Register extends AppCompatActivity {
 
         dobPicker.setOnClickListener(v -> showDatePickerDialog());
 
-        buttonNow.setOnClickListener(v -> {
+        // Xử lý sự kiện cho nút Back Arrow
+        backButton.setOnClickListener(v -> {
             Intent intent = new Intent(getApplicationContext(), Login.class);
             startActivity(intent);
             finish();
@@ -299,9 +300,15 @@ public class Register extends AppCompatActivity {
         String confirmPassword = editTextConfirmPassword.getText().toString().trim();
         String dob = editTextDob.getText().toString().trim();
 
-        emailError.setText(""); passwordError.setText(""); confirmPasswordError.setText("");
-        fullNameError.setText(""); usernameError.setText(""); dobError.setText("");
-        heightError.setText(""); weightError.setText(""); genderError.setText("");
+        emailError.setText(""); emailError.setVisibility(View.GONE);
+        passwordError.setText(""); passwordError.setVisibility(View.GONE);
+        confirmPasswordError.setText(""); confirmPasswordError.setVisibility(View.GONE);
+        fullNameError.setText(""); fullNameError.setVisibility(View.GONE);
+        usernameError.setText(""); usernameError.setVisibility(View.GONE);
+        dobError.setText(""); dobError.setVisibility(View.GONE);
+        heightError.setText(""); heightError.setVisibility(View.GONE);
+        weightError.setText(""); weightError.setVisibility(View.GONE);
+        genderError.setText(""); genderError.setVisibility(View.GONE);
         editTextEmail.setBackgroundResource(R.drawable.rounded_corner_text);
         editTextPassword.setBackgroundResource(R.drawable.rounded_corner_text);
         editTextConfirmPassword.setBackgroundResource(R.drawable.rounded_corner_text);
@@ -315,26 +322,31 @@ public class Register extends AppCompatActivity {
         if (TextUtils.isEmpty(email) || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             editTextEmail.setBackgroundResource(R.drawable.error_border);
             emailError.setText("Vui lòng nhập email hợp lệ");
+            emailError.setVisibility(View.VISIBLE);
             isValid = false;
         }
 
         if (TextUtils.isEmpty(password)) {
             editTextPassword.setBackgroundResource(R.drawable.error_border);
             passwordError.setText("Vui lòng nhập mật khẩu");
+            passwordError.setVisibility(View.VISIBLE);
             isValid = false;
         } else if (password.length() < 6) {
             editTextPassword.setBackgroundResource(R.drawable.error_border);
             passwordError.setText("Password phải có tối thiểu 6 ký tự");
+            passwordError.setVisibility(View.VISIBLE);
             isValid = false;
         } else if (!password.equals(confirmPassword)) {
             editTextConfirmPassword.setBackgroundResource(R.drawable.error_border);
             confirmPasswordError.setText("Confirm password không đúng với password ở trên");
+            confirmPasswordError.setVisibility(View.VISIBLE);
             isValid = false;
         }
 
         if (TextUtils.isEmpty(editTextFullName.getText().toString().trim())) {
             editTextFullName.setBackgroundResource(R.drawable.error_border);
             fullNameError.setText("Vui lòng nhập họ tên");
+            fullNameError.setVisibility(View.VISIBLE);
             isValid = false;
         }
 
@@ -342,6 +354,7 @@ public class Register extends AppCompatActivity {
         if (TextUtils.isEmpty(username)) {
             editTextUsername.setBackgroundResource(R.drawable.error_border);
             usernameError.setText("Vui lòng nhập tên người dùng");
+            usernameError.setVisibility(View.VISIBLE);
             isValid = false;
         }
 
@@ -350,6 +363,7 @@ public class Register extends AppCompatActivity {
             if (TextUtils.isEmpty(dob) || dob.length() != 10) {
                 editTextDob.setBackgroundResource(R.drawable.error_border);
                 dobError.setText("Vui lòng nhập đúng ngày sinh của bạn");
+                dobError.setVisibility(View.VISIBLE);
                 isValid = false;
             } else {
                 Date dobDate = dateFormat.parse(dob);
@@ -357,12 +371,14 @@ public class Register extends AppCompatActivity {
                 if (dobDate == null || dobDate.compareTo(currentDate) >= 0) {
                     editTextDob.setBackgroundResource(R.drawable.error_border);
                     dobError.setText("Vui lòng nhập đúng ngày sinh của bạn");
+                    dobError.setVisibility(View.VISIBLE);
                     isValid = false;
                 }
             }
         } catch (ParseException e) {
             editTextDob.setBackgroundResource(R.drawable.error_border);
             dobError.setText("Định dạng ngày sinh không hợp lệ");
+            dobError.setVisibility(View.VISIBLE);
             isValid = false;
         }
 
@@ -371,11 +387,13 @@ public class Register extends AppCompatActivity {
             if (heightValue <= 0) {
                 editTextHeight.setBackgroundResource(R.drawable.error_border);
                 heightError.setText("Chiều cao phải lớn hơn 0");
+                heightError.setVisibility(View.VISIBLE);
                 isValid = false;
             }
         } catch (NumberFormatException e) {
             editTextHeight.setBackgroundResource(R.drawable.error_border);
             heightError.setText("Vui lòng nhập chiều cao hợp lệ");
+            heightError.setVisibility(View.VISIBLE);
             isValid = false;
         }
 
@@ -384,17 +402,20 @@ public class Register extends AppCompatActivity {
             if (weightValue <= 0) {
                 editTextWeight.setBackgroundResource(R.drawable.error_border);
                 weightError.setText("Cân nặng phải lớn hơn 0");
+                weightError.setVisibility(View.VISIBLE);
                 isValid = false;
             }
         } catch (NumberFormatException e) {
             editTextWeight.setBackgroundResource(R.drawable.error_border);
             weightError.setText("Vui lòng nhập cân nặng hợp lệ");
+            weightError.setVisibility(View.VISIBLE);
             isValid = false;
         }
 
         if (radioGroupGender.getCheckedRadioButtonId() == -1) {
             radioGroupGender.setBackgroundResource(R.drawable.error_border);
             genderError.setText("Vui lòng chọn giới tính");
+            genderError.setVisibility(View.VISIBLE);
             isValid = false;
         }
 

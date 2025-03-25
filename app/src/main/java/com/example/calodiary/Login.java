@@ -30,7 +30,7 @@ public class Login extends AppCompatActivity {
     TextView forgotPasswordBtn;
     FirebaseAuth mAuth;
     FirebaseFirestore db;
-    Button buttonNow;
+    Button buttonNow; // Nút Register
     ImageView togglePassword;
     boolean isPasswordVisible = false;
 
@@ -53,7 +53,7 @@ public class Login extends AppCompatActivity {
         editTextEmailOrUsername = findViewById(R.id.username_input);
         editTextPassword = findViewById(R.id.password_input);
         buttonLog = findViewById(R.id.login_btn);
-        buttonNow = findViewById(R.id.registerNow);
+        buttonNow = findViewById(R.id.registerNow); // Ánh xạ nút Register
         togglePassword = findViewById(R.id.toggle_password);
         forgotPasswordBtn = findViewById(R.id.fgp_btn);
 
@@ -174,12 +174,11 @@ public class Login extends AppCompatActivity {
                     if (document.exists()) {
                         String pendingEmail = document.getString("pendingEmail");
                         Boolean emailVerified = document.getBoolean("emailVerified");
-                        String role = document.getString("role"); // Lấy role từ Firestore
+                        String role = document.getString("role");
 
                         if (pendingEmail != null && !pendingEmail.equals(user.getEmail()) && (emailVerified == null || !emailVerified)) {
                             Toast.makeText(Login.this, "Vui lòng xác nhận email mới (" + pendingEmail + ") trước khi đăng nhập!", Toast.LENGTH_LONG).show();
                         } else if (pendingEmail != null && !pendingEmail.equals(user.getEmail()) && user.isEmailVerified()) {
-                            // Email mới đã được xác nhận, đồng bộ Firestore
                             Map<String, Object> updates = new HashMap<>();
                             updates.put("email", pendingEmail);
                             updates.put("pendingEmail", null);
@@ -188,14 +187,14 @@ public class Login extends AppCompatActivity {
                             db.collection("users").document(user.getUid())
                                     .update(updates)
                                     .addOnSuccessListener(aVoid -> {
-                                        redirectBasedOnRole(role); // Chuyển hướng dựa trên role
+                                        redirectBasedOnRole(role);
                                     })
                                     .addOnFailureListener(e -> {
                                         Toast.makeText(Login.this, "Lỗi khi cập nhật email: " + e.getMessage(), Toast.LENGTH_LONG).show();
                                         mAuth.signOut();
                                     });
                         } else if (user.isEmailVerified()) {
-                            redirectBasedOnRole(role); // Chuyển hướng dựa trên role
+                            redirectBasedOnRole(role);
                         } else {
                             Toast.makeText(Login.this, "Email chưa được xác nhận. Vui lòng kiểm tra hộp thư!", Toast.LENGTH_LONG).show();
                         }
@@ -211,12 +210,12 @@ public class Login extends AppCompatActivity {
     private void redirectBasedOnRole(String role) {
         if ("admin".equals(role)) {
             Toast.makeText(Login.this, "Đăng nhập thành công với vai trò Admin", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(getApplicationContext(), AdminDashboard.class); // Màn hình Admin
+            Intent intent = new Intent(getApplicationContext(), AdminDashboard.class);
             startActivity(intent);
             finish();
-        } else { // Mặc định là "user" hoặc role không xác định
+        } else {
             Toast.makeText(Login.this, "Đăng nhập thành công với vai trò User", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(getApplicationContext(), Profile.class); // Màn hình User
+            Intent intent = new Intent(getApplicationContext(), Profile.class);
             startActivity(intent);
             finish();
         }
