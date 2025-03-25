@@ -13,15 +13,17 @@ public class Posts implements Serializable {
     private String authorId;
     private String status; // 'pending', 'approved', 'rejected'
     private String img;
+    private boolean isAI;
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
-    public Posts(String title, String content, String authorId, String status, String img, Timestamp createdAt, Timestamp updatedAt) {
+    public Posts(String title, String content, String authorId, String status, String img, boolean isAI, Timestamp createdAt, Timestamp updatedAt) {
         this.title = title;
         this.content = content;
         this.authorId = authorId;
         this.status = status;
         this.img = img;
+        this.isAI = isAI;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -91,5 +93,13 @@ public class Posts implements Serializable {
 
     public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public boolean isAI() {
+        return isAI;
+    }
+
+    public void setAI(boolean AI) {
+        isAI = AI;
     }
 }

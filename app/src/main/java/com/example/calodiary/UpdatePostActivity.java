@@ -24,10 +24,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
 import com.bumptech.glide.Glide;
 import com.example.calodiary.Model.Posts;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -39,12 +35,9 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+
 
 public class UpdatePostActivity extends AppCompatActivity {
     private TextView updateTitle, updateContent;
@@ -53,7 +46,6 @@ public class UpdatePostActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private String documentId;
     private Uri selectedImageUri;
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -163,12 +155,16 @@ public class UpdatePostActivity extends AppCompatActivity {
                     return;
                 }
 
+                if (title.length() > 100 || content.length() > 1500) {
+                    Toast.makeText(UpdatePostActivity.this, "content length exceed 1500", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 DocumentReference postRef = db.collection("posts").document(documentId);
                 postRef.set(post)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
-                                Log.d(TAG, "DocumentSnapshot successfully updated!");
                                 Intent intent = new Intent(UpdatePostActivity.this, DisplayCreatedPostActivity.class);
                                 startActivity(intent);
                                 finish();

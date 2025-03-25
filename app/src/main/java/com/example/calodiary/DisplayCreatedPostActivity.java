@@ -78,10 +78,10 @@ public class DisplayCreatedPostActivity extends AppCompatActivity {
     }
 
 
-
     private void loadPostsFromFirestore() {
         db.collection("posts")
                 .whereEqualTo("status", "pending")
+                .whereEqualTo("ai", false)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -115,5 +115,11 @@ public class DisplayCreatedPostActivity extends AppCompatActivity {
             }
         }
         postAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadPostsFromFirestore();
     }
 }
