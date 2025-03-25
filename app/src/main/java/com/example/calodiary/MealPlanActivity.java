@@ -18,6 +18,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,16 +43,25 @@ public class MealPlanActivity extends AppCompatActivity{
     private List<Meal> meals;
     private MealAdapter mealAdapter;
     private SharedPreferences sharedPreferences;
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
+    private String currentDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_meal_plan);
 
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+        currentDate = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            .format(new Date());
+
         initializeViews();
         loadUserData();
         setupListView();
         setupClickListeners();
+        loadMealsFromFirebase();
     }
 
     private void initializeViews() {
@@ -213,6 +226,39 @@ public class MealPlanActivity extends AppCompatActivity{
     private void updateCaloriesDisplay() {
         tvDailyCalories.setText(String.format("Lượng calo cần thiết: %.0f kcal", dailyCalories));
         tvRemainingCalories.setText(String.format("Còn lại: %.0f kcal", remainingCalories));
+    }
+
+    private void loadMealsFromFirebase() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) return;
+
+        db.collection("daily_meals")
+            .document(currentUser.getUid() + "_" + currentDate)
+            .get()
+            .addOnSuccessListener(documentSnapshot -> {
+                DailyMeal dailyMeal = documentSnapshot.toObject(DailyMeal.class);
+                if (dailyMeal != null) {
+                    meals = dailyMeal.getMeals();
+                    mealAdapter.notifyDataSetChanged();
+                    updateRemainingCalories();
+                    updateCaloriesDisplay();
+                }
+            });
+    }
+
+    private void saveMealsToFirebase() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) return;
+
+        DailyMeal dailyMeal = new DailyMeal(currentUser.getUid(), currentDate, meals);
+
+        db.collection("daily_meals")
+            .document(currentUser.getUid() + "_" + currentDate)
+            .set(dailyMeal)
+            .addOnSuccessListener(aVoid -> 
+                Toast.makeText(this, "Đã lưu thực đơn", Toast.LENGTH_SHORT).show())
+            .addOnFailureListener(e -> 
+                Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     private class MealAdapter extends ArrayAdapter<Meal> {

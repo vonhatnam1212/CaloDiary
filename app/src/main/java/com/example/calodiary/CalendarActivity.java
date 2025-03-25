@@ -16,6 +16,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.DocumentSnapshot;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,6 +31,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.HashMap;
 
 public class CalendarActivity extends AppCompatActivity {
     private TextView tvCurrentWeek;
@@ -41,14 +48,20 @@ public class CalendarActivity extends AppCompatActivity {
     private SimpleDateFormat dateFormat;
     private SimpleDateFormat dayFormat;
 
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
+    private UserHealth userHealth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calendar);
 
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+
         initializeViews();
-        loadUserData();
-        setupWeekView();
+        loadUserHealth();
     }
 
     private void initializeViews() {
@@ -65,9 +78,21 @@ public class CalendarActivity extends AppCompatActivity {
         dayFormat = new SimpleDateFormat("EEE", Locale.getDefault());
     }
 
-    private void loadUserData() {
-        targetCalories = sharedPreferences.getFloat("dailyCalories", 0);
-        tvTargetCalories.setText(String.format("Mục tiêu: %.0f kcal/ngày", targetCalories));
+    private void loadUserHealth() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) return;
+
+        db.collection("user_health")
+            .document(currentUser.getUid())
+            .get()
+            .addOnSuccessListener(documentSnapshot -> {
+                userHealth = documentSnapshot.toObject(UserHealth.class);
+                if (userHealth != null) {
+                    targetCalories = userHealth.getDailyCalories();
+                    tvTargetCalories.setText(String.format("Mục tiêu: %.0f kcal/ngày", targetCalories));
+                    setupWeekView();
+                }
+            });
     }
 
     private void setupWeekView() {
