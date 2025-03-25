@@ -2,33 +2,58 @@ package com.example.calodiary.model;
 
 public class UserHealth {
     private String userId;
-    private float bmi;
-    private String bmiCategory;
-    private double dailyCalories;
-    private float weight;
-    private float height;
-    private int age;
-    private int activityLevel;
-    private boolean isMale;
-    private long timestamp;
+    private double height;
+    private double weight;
+    private double bmi;
+    private double bmr;
+    private double dailyCalorieNeeds;
+    private String lastUpdateDate;
 
-    // Empty constructor for Firebase
-    public UserHealth() {}
-
-    // Constructor with parameters
-    public UserHealth(String userId, float bmi, String bmiCategory, double dailyCalories,
-                     float weight, float height, int age, int activityLevel, boolean isMale) {
-        this.userId = userId;
-        this.bmi = bmi;
-        this.bmiCategory = bmiCategory;
-        this.dailyCalories = dailyCalories;
-        this.weight = weight;
-        this.height = height;
-        this.age = age;
-        this.activityLevel = activityLevel;
-        this.isMale = isMale;
-        this.timestamp = System.currentTimeMillis();
+    public UserHealth() {
+        // Empty constructor for Firestore
     }
 
-    // Getters and setters
+    public UserHealth(String userId, double height, double weight) {
+        this.userId = userId;
+        this.height = height;
+        this.weight = weight;
+        calculateHealthMetrics();
+    }
+
+    // Getters
+    public String getUserId() { return userId; }
+    public double getHeight() { return height; }
+    public double getWeight() { return weight; }
+    public double getBmi() { return bmi; }
+    public double getBmr() { return bmr; }
+    public double getDailyCalorieNeeds() { return dailyCalorieNeeds; }
+    public String getLastUpdateDate() { return lastUpdateDate; }
+
+    // Setters
+    public void setUserId(String userId) { this.userId = userId; }
+    public void setHeight(double height) { 
+        this.height = height;
+        calculateHealthMetrics();
+    }
+    public void setWeight(double weight) { 
+        this.weight = weight;
+        calculateHealthMetrics();
+    }
+    public void setBmi(double bmi) { this.bmi = bmi; }
+    public void setBmr(double bmr) { this.bmr = bmr; }
+    public void setDailyCalorieNeeds(double dailyCalorieNeeds) { this.dailyCalorieNeeds = dailyCalorieNeeds; }
+    public void setLastUpdateDate(String lastUpdateDate) { this.lastUpdateDate = lastUpdateDate; }
+
+    // Calculate BMI, BMR and daily calorie needs
+    private void calculateHealthMetrics() {
+        // Calculate BMI
+        double heightInMeters = height / 100.0; // Convert cm to meters
+        bmi = weight / (heightInMeters * heightInMeters);
+
+        // Calculate BMR (using Mifflin-St Jeor Equation)
+        bmr = (10 * weight) + (6.25 * height) - 5;
+
+        // Calculate daily calorie needs (using moderate activity multiplier of 1.55)
+        dailyCalorieNeeds = bmr * 1.55;
+    }
 } 

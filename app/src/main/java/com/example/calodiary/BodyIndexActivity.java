@@ -20,6 +20,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.DecimalFormat;
+import java.util.Locale;
+
+import com.example.calodiary.model.UserHealth;
 
 public class BodyIndexActivity extends AppCompatActivity {
     private EditText etAge, etWeight, etHeight, etActivity;
@@ -175,29 +178,24 @@ public class BodyIndexActivity extends AppCompatActivity {
             resultLayout.setVisibility(View.VISIBLE);
 
             // Lưu kết quả
-            saveResultsToFirebase(bmi, category, tdee, weight, height, age, activity, isMale);
+            saveHealthData();
 
         } catch (Exception e) {
             Toast.makeText(this, "Có lỗi xảy ra, vui lòng thử lại", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void saveResultsToFirebase(float bmi, String category, double tdee,
-                                     float weight, float height, int age, 
-                                     int activity, boolean isMale) {
+    private void saveHealthData() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) return;
 
+        double heightInCm = etHeight.getText().toString().isEmpty() ? 0 : Float.parseFloat(etHeight.getText().toString()) * 100;
+        double weightInKg = etWeight.getText().toString().isEmpty() ? 0 : Float.parseFloat(etWeight.getText().toString());
+
         UserHealth userHealth = new UserHealth(
             currentUser.getUid(),
-            bmi,
-            category,
-            tdee,
-            weight,
-            height,
-            age,
-            activity,
-            isMale
+            heightInCm,
+            weightInKg
         );
 
         db.collection("user_health")
@@ -205,25 +203,20 @@ public class BodyIndexActivity extends AppCompatActivity {
             .set(userHealth)
             .addOnSuccessListener(aVoid -> {
                 Toast.makeText(this, "Đã lưu thông tin", Toast.LENGTH_SHORT).show();
-                showResultDialog(bmi, category, tdee);
+                showResultDialog(userHealth.getBmi(), userHealth.getBmr(), userHealth.getDailyCalorieNeeds());
             })
             .addOnFailureListener(e -> {
                 Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             });
     }
 
-    @SuppressLint("DefaultLocale")
-    private void showResultDialog(float bmi, String category, double tdee) {
+    private void showResultDialog(double bmi, double bmr, double dailyCalories) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Kết quả tính toán")
-               .setMessage(String.format(
-                   "BMI: %.2f\nPhân loại: %s\nLượng calo cần thiết: %.0f kcal/ngày",
-                   bmi, category, tdee))
-               .setPositiveButton("Lập thực đơn", (dialog, which) -> {
-                   Intent intent = new Intent( BodyIndexActivity.this, MealPlanActivity.class);
-                   startActivity(intent);
-               })
-               .setNegativeButton("Đóng", null)
-               .show();
+        builder.setTitle("Kết quả tính toán");
+        builder.setMessage(String.format(Locale.getDefault(),
+            "BMI: %.2f\nBMR: %.2f calories/day\nDaily Calorie Needs: %.2f calories/day",
+            bmi, bmr, dailyCalories));
+        builder.setPositiveButton("OK", null);
+        builder.show();
     }
 } 

@@ -34,6 +34,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.HashMap;
 
+import com.example.calodiary.model.UserHealth;
+import com.example.calodiary.model.Meal;
+
 public class CalendarActivity extends AppCompatActivity {
     private TextView tvCurrentWeek;
     private TextView tvTargetCalories;
@@ -88,7 +91,7 @@ public class CalendarActivity extends AppCompatActivity {
             .addOnSuccessListener(documentSnapshot -> {
                 userHealth = documentSnapshot.toObject(UserHealth.class);
                 if (userHealth != null) {
-                    targetCalories = userHealth.getDailyCalories();
+                    targetCalories = userHealth.getDailyCalorieNeeds();
                     tvTargetCalories.setText(String.format("Mục tiêu: %.0f kcal/ngày", targetCalories));
                     setupWeekView();
                 }
@@ -160,7 +163,7 @@ public class CalendarActivity extends AppCompatActivity {
         tvDayCalories.setTextColor(totalCalories < targetCalories ? Color.RED : Color.GREEN);
 
         // Load and display meals
-        List<MealPlanActivity.Meal> dayMeals = getDayMeals(dateStr);
+        List<Meal> dayMeals = getDayMeals(dateStr);
         MealAdapter adapter = new MealAdapter(this, dayMeals);
         listDayMeals.setAdapter(adapter);
     }
@@ -183,15 +186,15 @@ public class CalendarActivity extends AppCompatActivity {
         return 0;
     }
 
-    private List<MealPlanActivity.Meal> getDayMeals(String dateStr) {
-        List<MealPlanActivity.Meal> meals = new ArrayList<>();
+    private List<Meal> getDayMeals(String dateStr) {
+        List<Meal> meals = new ArrayList<>();
         try {
             String mealsJson = sharedPreferences.getString("meals_" + dateStr, null);
             if (mealsJson != null) {
                 JSONArray jsonArray = new JSONArray(mealsJson);
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonMeal = jsonArray.getJSONObject(i);
-                    meals.add(new MealPlanActivity.Meal(
+                    meals.add(new Meal(
                         jsonMeal.getInt("type"),
                         jsonMeal.getString("name"),
                         jsonMeal.getDouble("calories"),
@@ -219,49 +222,32 @@ public class CalendarActivity extends AppCompatActivity {
     }
 
     // Thêm inner class MealAdapter
-    private class MealAdapter extends ArrayAdapter<MealPlanActivity.Meal> {
+    private class MealAdapter extends ArrayAdapter<Meal> {
         private final String[] MEAL_TYPES = {"Bữa sáng", "Bữa trưa", "Bữa tối", "Bữa phụ"};
 
-        MealAdapter(Context context, List<MealPlanActivity.Meal> meals) {
-            super(context, R.layout.item_meal, meals);
+        MealAdapter(Context context, List<Meal> meals) {
+            super(context, 0, meals);
         }
 
-        @NonNull
         @Override
-        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+        public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
                 convertView = LayoutInflater.from(getContext())
                     .inflate(R.layout.item_meal, parent, false);
             }
 
-            MealPlanActivity.Meal meal = getItem(position);
-            if (meal != null) {
-                TextView tvMealType = convertView.findViewById(R.id.tvMealType);
-                TextView tvMealName = convertView.findViewById(R.id.tvMealName);
-                TextView tvMealCalories = convertView.findViewById(R.id.tvMealCalories);
+            TextView tvMealType = convertView.findViewById(R.id.tvMealType);
+            TextView tvMealName = convertView.findViewById(R.id.tvMealName);
+            TextView tvMealDetails = convertView.findViewById(R.id.tvMealDetails);
 
-                tvMealType.setText(MEAL_TYPES[meal.type]);
-                tvMealName.setText(meal.name);
-                tvMealCalories.setText(String.format("%.0f kcal (%.0fg)", 
-                    meal.calories, meal.portion));
-            }
+            Meal meal = getItem(position);
+            tvMealType.setText(MEAL_TYPES[meal.getType()]);
+            tvMealName.setText(meal.getName());
+            tvMealDetails.setText(String.format(Locale.getDefault(),
+                "%.0f calories, %.1f portion",
+                meal.getCalories(), meal.getPortion()));
 
             return convertView;
-        }
-    }
-
-    // Thêm class Meal
-    static class Meal {
-        int type;
-        String name;
-        double calories;
-        double portion;
-
-        Meal(int type, String name, double calories, double portion) {
-            this.type = type;
-            this.name = name;
-            this.calories = calories;
-            this.portion = portion;
         }
     }
 } 

@@ -32,6 +32,9 @@ import java.util.List;
 import java.util.Locale;
 import java.text.SimpleDateFormat;
 
+import com.example.calodiary.model.DailyMeal;
+import com.example.calodiary.model.Meal;
+
 public class MealPlanActivity extends AppCompatActivity{
     private TextView tvDailyCalories;
     private TextView tvRemainingCalories;
@@ -40,7 +43,7 @@ public class MealPlanActivity extends AppCompatActivity{
     
     private double dailyCalories;
     private double remainingCalories;
-    private List<Meal> meals;
+    private List<Meal> meals = new ArrayList<>();
     private MealAdapter mealAdapter;
     private SharedPreferences sharedPreferences;
     private FirebaseAuth mAuth;
@@ -77,19 +80,13 @@ public class MealPlanActivity extends AppCompatActivity{
         dailyCalories = sharedPreferences.getFloat("dailyCalories", 0);
         remainingCalories = dailyCalories;
         
-        meals = new ArrayList<>();
         String mealsJson = sharedPreferences.getString("meals", null);
         if (mealsJson != null) {
             try {
                 JSONArray jsonArray = new JSONArray(mealsJson);
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    meals.add(new Meal(
-                        jsonObject.getInt("type"),
-                        jsonObject.getString("name"),
-                        jsonObject.getDouble("calories"),
-                        jsonObject.getDouble("portion")
-                    ));
+                    addMealFromJson(jsonObject);
                 }
                 updateRemainingCalories();
             } catch (JSONException e) {
@@ -135,8 +132,8 @@ public class MealPlanActivity extends AppCompatActivity{
                .setPositiveButton("Thêm", (dialog, which) -> {
                    if (validateMealInput(etMealName, etCalories, etPortion)) {
                        addMeal(
-                           spinnerMealType.getSelectedItemPosition(),
                            etMealName.getText().toString(),
+                           spinnerMealType.getSelectedItemPosition(),
                            Double.parseDouble(etCalories.getText().toString()),
                            Double.parseDouble(etPortion.getText().toString())
                        );
@@ -182,10 +179,10 @@ public class MealPlanActivity extends AppCompatActivity{
         return true;
     }
 
-    private void addMeal(int type, String name, double calories, double portion) {
+    private void addMeal(String name, int type, double calories, double portion) {
         Meal meal = new Meal(type, name, calories, portion);
         meals.add(meal);
-        mealAdapter.notifyDataSetChanged();
+        updateMealList();
         saveMeals();
         updateRemainingCalories();
         updateCaloriesDisplay();
@@ -196,11 +193,7 @@ public class MealPlanActivity extends AppCompatActivity{
         try {
             JSONArray jsonArray = new JSONArray();
             for (Meal meal : meals) {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("type", meal.type);
-                jsonObject.put("name", meal.name);
-                jsonObject.put("calories", meal.calories);
-                jsonObject.put("portion", meal.portion);
+                JSONObject jsonObject = mealToJson(meal);
                 jsonArray.put(jsonObject);
             }
             
@@ -218,7 +211,7 @@ public class MealPlanActivity extends AppCompatActivity{
     private void updateRemainingCalories() {
         remainingCalories = dailyCalories;
         for (Meal meal : meals) {
-            remainingCalories -= meal.calories;
+            remainingCalories -= meal.getCalories();
         }
     }
 
@@ -261,48 +254,54 @@ public class MealPlanActivity extends AppCompatActivity{
                 Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
+    private void addMealFromJson(JSONObject jsonObject) throws JSONException {
+        Meal meal = new Meal(
+            jsonObject.getInt("type"),
+            jsonObject.getString("name"),
+            jsonObject.getDouble("calories"),
+            jsonObject.getDouble("portion")
+        );
+        meals.add(meal);
+    }
+
+    private JSONObject mealToJson(Meal meal) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", meal.getType());
+        jsonObject.put("name", meal.getName());
+        jsonObject.put("calories", meal.getCalories());
+        jsonObject.put("portion", meal.getPortion());
+        return jsonObject;
+    }
+
+    private void updateMealList() {
+        mealAdapter.notifyDataSetChanged();
+    }
+
     private class MealAdapter extends ArrayAdapter<Meal> {
         MealAdapter(List<Meal> meals) {
             super(MealPlanActivity.this, R.layout.item_meal, meals);
         }
 
-        @NonNull
-        @SuppressLint("DefaultLocale")
         @Override
-        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+        public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
                 convertView = LayoutInflater.from(getContext())
                     .inflate(R.layout.item_meal, parent, false);
             }
 
-            Meal meal = getItem(position);
-            if (meal != null) {
-                TextView tvMealType = convertView.findViewById(R.id.tvMealType);
-                TextView tvMealName = convertView.findViewById(R.id.tvMealName);
-                TextView tvMealCalories = convertView.findViewById(R.id.tvMealCalories);
+            TextView tvMealType = convertView.findViewById(R.id.tvMealType);
+            TextView tvMealName = convertView.findViewById(R.id.tvMealName);
+            TextView tvMealDetails = convertView.findViewById(R.id.tvMealDetails);
 
-                String[] mealTypes = {"Bữa sáng", "Bữa trưa", "Bữa tối", "Bữa phụ"};
-                tvMealType.setText(mealTypes[meal.type]);
-                tvMealName.setText(meal.name);
-                tvMealCalories.setText(String.format("%.0f kcal (%.0fg)", 
-                    meal.calories, meal.portion));
-            }
+            Meal meal = getItem(position);
+            String[] mealTypes = {"Bữa sáng", "Bữa trưa", "Bữa tối", "Bữa phụ"};
+            tvMealType.setText(mealTypes[meal.getType()]);
+            tvMealName.setText(meal.getName());
+            tvMealDetails.setText(String.format(Locale.getDefault(),
+                "%.0f calories, %.1f portion",
+                meal.getCalories(), meal.getPortion()));
 
             return convertView;
-        }
-    }
-
-    public static class Meal {
-        int type;
-        String name;
-        double calories;
-        double portion;
-
-        Meal(int type, String name, double calories, double portion) {
-            this.type = type;
-            this.name = name;
-            this.calories = calories;
-            this.portion = portion;
         }
     }
 }
