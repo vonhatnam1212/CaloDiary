@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">CaloDiary</string>
+    <string name="click_to_login">Click to login</string>
+    <string name="logout">Logout</string>
 </resources>

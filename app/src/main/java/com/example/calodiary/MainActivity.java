@@ -2,35 +2,52 @@ package com.example.calodiary;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
+
+    FirebaseAuth auth;
+    Button button;
+    TextView textView;
+    FirebaseUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Add a delay to show splash screen (you can remove this if not needed)
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                // Check if user is logged in here
-                boolean isLoggedIn = false; // TODO: Implement your login check logic
+        auth = FirebaseAuth.getInstance();
+        button = findViewById(R.id.logout);
+        textView = findViewById(R.id.user_details);
+        user = auth.getCurrentUser();
+        if(user == null){
+            Intent intent = new Intent(getApplicationContext(), Login.class);
+            startActivity(intent);
+            finish();
+        }
+        else {
+            textView.setText(user. getEmail());
+        }
 
-                if (isLoggedIn) {
-                    // Navigate to Home/Dashboard
-                    Intent intent = new Intent(MainActivity.this, HomeActivity.class);
-                    startActivity(intent);
-                } else {
-                    // Navigate to Login
-                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                    startActivity(intent);
-                }
-                finish(); // This prevents going back to the splash screen
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                Intent intent = new Intent(getApplicationContext(), Login.class);
+                startActivity(intent);
+                finish();
             }
-        }, 1000); // 1 second delay, adjust as needed
+        });
     }
 }

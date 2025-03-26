@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.calodiary">
-    <uses-permission android:name="android.permission.INTERNET"/>
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -12,17 +16,40 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.CaloDiary"
-        tools:targetApi="31" >
+        tools:targetApi="31">
+        <activity
+            android:name=".UpdatePostActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DetailPostActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ViewDetailPostActivity"
+            android:exported="false" />
+        <activity
+            android:name=".UploadPostActivity"
+            android:exported="true" />
+        <activity
+            android:name=".DisplayCreatedPostActivity"
+            android:exported="true" />
         <activity
             android:name=".LoginActivity" />
         <activity
             android:name=".HomeActivity" />
         <activity
+            android:name=".AdminDashboard"
+            android:exported="false" />
+        <!-- Launcher activity remains Login -->
+        <activity
+            android:name=".Login"
+            android:exported="true"/>
+        <!-- Launcher activity remains Login -->
+        <activity
             android:name=".MainActivity" />
         <activity
             android:name=".SplashActivity"
             android:exported="true"
-            android:theme="@style/Theme.Design.NoActionBar" >
+            android:theme="@style/Theme.Design.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -30,20 +57,17 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ProfileActivity"
-            android:label="Hồ sơ cá nhân"/>
+            android:name=".Register"
+            android:exported="false" />
         <activity
-            android:name=".BodyIndexActivity"
-            android:label="Tính chỉ số cơ thể"/>
+            android:name=".EditProfile"
+            android:exported="false" />
         <activity
-            android:name=".MealPlanActivity"
-            android:label="Thực đơn"/>
+            android:name=".ForgetPassword"
+            android:exported="false" />
         <activity
-            android:name=".CalendarActivity"
-            android:label="Lịch"/>
-        <activity
-            android:name=".ChatActivity"
-            android:label="Chat"/>
-
+            android:name=".Profile"
+            android:exported="false" />
     </application>
+
 </manifest>
