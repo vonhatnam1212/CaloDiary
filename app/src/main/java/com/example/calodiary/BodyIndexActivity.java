@@ -15,7 +15,14 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.text.DecimalFormat;
+import java.util.Locale;
+
+import com.example.calodiary.model.UserHealth;
 
 public class BodyIndexActivity extends AppCompatActivity {
     private EditText etAge, etWeight, etHeight, etActivity;
@@ -23,6 +30,8 @@ public class BodyIndexActivity extends AppCompatActivity {
     private TextView tvBMI, tvBMICategory, tvCalories;
     private Button btnCalculate;
     private LinearLayout resultLayout;
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +39,9 @@ public class BodyIndexActivity extends AppCompatActivity {
         setContentView(R.layout.activity_body_index);
         initializeViews();
         setupClickListeners();
+
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
     }
 
     private void initializeViews() {
@@ -166,38 +178,45 @@ public class BodyIndexActivity extends AppCompatActivity {
             resultLayout.setVisibility(View.VISIBLE);
 
             // Lưu kết quả
-            SharedPreferences sharedPreferences = getSharedPreferences("CaloDiaryPrefs", MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putFloat("bmi", bmi);
-            editor.putString("bmiCategory", category);
-            editor.putFloat("dailyCalories", (float) tdee);
-            editor.putFloat("weight", weight);
-            editor.putFloat("height", height);
-            editor.putInt("age", age);
-            editor.putInt("activityLevel", activity);
-            editor.putBoolean("isMale", isMale);
-            editor.apply();
-
-            // Hiển thị dialog kết quả và chuyển hướng
-            showResultDialog(bmi, category, tdee);
+            saveHealthData();
 
         } catch (Exception e) {
             Toast.makeText(this, "Có lỗi xảy ra, vui lòng thử lại", Toast.LENGTH_SHORT).show();
         }
     }
 
-    @SuppressLint("DefaultLocale")
-    private void showResultDialog(float bmi, String category, double tdee) {
+    private void saveHealthData() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) return;
+
+        double heightInCm = etHeight.getText().toString().isEmpty() ? 0 : Float.parseFloat(etHeight.getText().toString()) * 100;
+        double weightInKg = etWeight.getText().toString().isEmpty() ? 0 : Float.parseFloat(etWeight.getText().toString());
+
+        UserHealth userHealth = new UserHealth(
+            currentUser.getUid(),
+            heightInCm,
+            weightInKg
+        );
+
+        db.collection("user_health")
+            .document(currentUser.getUid())
+            .set(userHealth)
+            .addOnSuccessListener(aVoid -> {
+                Toast.makeText(this, "Đã lưu thông tin", Toast.LENGTH_SHORT).show();
+                showResultDialog(userHealth.getBmi(), userHealth.getBmr(), userHealth.getDailyCalorieNeeds());
+            })
+            .addOnFailureListener(e -> {
+                Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            });
+    }
+
+    private void showResultDialog(double bmi, double bmr, double dailyCalories) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Kết quả tính toán")
-               .setMessage(String.format(
-                   "BMI: %.2f\nPhân loại: %s\nLượng calo cần thiết: %.0f kcal/ngày",
-                   bmi, category, tdee))
-               .setPositiveButton("Lập thực đơn", (dialog, which) -> {
-                   Intent intent = new Intent( BodyIndexActivity.this, MealPlanActivity.class);
-                   startActivity(intent);
-               })
-               .setNegativeButton("Đóng", null)
-               .show();
+        builder.setTitle("Kết quả tính toán");
+        builder.setMessage(String.format(Locale.getDefault(),
+            "BMI: %.2f\nBMR: %.2f calories/day\nDaily Calorie Needs: %.2f calories/day",
+            bmi, bmr, dailyCalories));
+        builder.setPositiveButton("OK", null);
+        builder.show();
     }
 } 

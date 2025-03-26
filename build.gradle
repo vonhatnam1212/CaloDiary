@@ -4,8 +4,8 @@ buildscript {
         mavenCentral() // Fallback repository
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.1.0' // AGP version
-        classpath 'com.google.gms:google-services:4.4.2'
+        classpath 'com.android.tools.build:gradle:8.2.2'
+        classpath 'com.google.gms:google-services:4.4.0'
     }
 }
 
@@ -13,5 +13,10 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        // Nếu cần thiết, thêm jcenter() cho một số thư viện cũ
     }
+}
+
+tasks.register('clean', Delete) {
+    delete rootProject.buildDir
 }
