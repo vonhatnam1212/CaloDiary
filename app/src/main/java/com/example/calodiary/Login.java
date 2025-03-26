@@ -4,40 +4,23 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.TextUtils;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
+import com.example.calodiary.databinding.ActivityLoginBinding;
+import com.example.calodiary.utils.FirebaseManager;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class Login extends AppCompatActivity {
-
-    EditText editTextEmailOrUsername, editTextPassword;
-    Button buttonLog;
-    TextView forgotPasswordBtn;
-    FirebaseAuth mAuth;
-    FirebaseFirestore db;
-    Button buttonNow; // Nút Register
-    ImageView togglePassword;
-    boolean isPasswordVisible = false;
+    private ActivityLoginBinding binding;
+    private FirebaseManager firebaseManager;
+    private boolean isPasswordVisible = false;
 
     @Override
     public void onStart() {
         super.onStart();
-        FirebaseUser currentUser = mAuth.getCurrentUser();
+        FirebaseUser currentUser = FirebaseManager.getInstance().getCurrentUser();
         if (currentUser != null && currentUser.isEmailVerified()) {
             checkPendingEmailAndRole(currentUser);
         }
@@ -46,178 +29,113 @@ public class Login extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        binding = ActivityLoginBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
-        editTextEmailOrUsername = findViewById(R.id.username_input);
-        editTextPassword = findViewById(R.id.password_input);
-        buttonLog = findViewById(R.id.login_btn);
-        buttonNow = findViewById(R.id.registerNow); // Ánh xạ nút Register
-        togglePassword = findViewById(R.id.toggle_password);
-        forgotPasswordBtn = findViewById(R.id.fgp_btn);
+        firebaseManager = FirebaseManager.getInstance();
 
-        buttonNow.setOnClickListener(v -> {
-            Intent intent = new Intent(getApplicationContext(), Register.class);
-            startActivity(intent);
+        binding.registerNow.setOnClickListener(v -> {
+            startActivity(new Intent(this, Register.class));
             finish();
         });
 
-        togglePassword.setOnClickListener(v -> {
+        binding.togglePassword.setOnClickListener(v -> {
             if (isPasswordVisible) {
-                editTextPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                togglePassword.setImageResource(R.drawable.ic_visibility_off);
+                binding.passwordInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                binding.togglePassword.setImageResource(R.drawable.ic_visibility_off);
                 isPasswordVisible = false;
             } else {
-                editTextPassword.setInputType(InputType.TYPE_CLASS_TEXT);
-                togglePassword.setImageResource(R.drawable.ic_visibility);
+                binding.passwordInput.setInputType(InputType.TYPE_CLASS_TEXT);
+                binding.togglePassword.setImageResource(R.drawable.ic_visibility);
                 isPasswordVisible = true;
             }
-            editTextPassword.setSelection(editTextPassword.getText().length());
+            binding.passwordInput.setSelection(binding.passwordInput.getText().length());
         });
 
-        forgotPasswordBtn.setOnClickListener(v -> {
-            Intent intent = new Intent(getApplicationContext(), ForgetPassword.class);
-            startActivity(intent);
-        });
+        binding.fgpBtn.setOnClickListener(v -> startActivity(new Intent(this, ForgetPassword.class)));
 
-        buttonLog.setOnClickListener(v -> {
-            String input = editTextEmailOrUsername.getText().toString().trim();
-            String password = editTextPassword.getText().toString().trim();
+        binding.loginBtn.setOnClickListener(v -> {
+            String input = binding.usernameInput.getText().toString().trim();
+            String password = binding.passwordInput.getText().toString().trim();
 
-            if (TextUtils.isEmpty(input)) {
-                Toast.makeText(Login.this, "Vui lòng nhập email hoặc username", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if (TextUtils.isEmpty(password)) {
-                Toast.makeText(Login.this, "Vui lòng nhập mật khẩu", Toast.LENGTH_SHORT).show();
+            if (TextUtils.isEmpty(input) || TextUtils.isEmpty(password)) {
+                Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             if (input.contains("@") && input.contains(".")) {
                 checkEmailAndLogin(input, password);
             } else {
-                db.collection("users")
+                firebaseManager.getInstance().db.collection("users")
                         .whereEqualTo("username", input)
                         .get()
                         .addOnCompleteListener(task -> {
                             if (task.isSuccessful() && !task.getResult().isEmpty()) {
-                                String foundEmail = task.getResult().getDocuments().get(0).getString("email");
-                                String pendingEmail = task.getResult().getDocuments().get(0).getString("pendingEmail");
-                                Boolean emailVerified = task.getResult().getDocuments().get(0).getBoolean("emailVerified");
-
-                                if (foundEmail != null) {
-                                    if (pendingEmail != null && !pendingEmail.equals(foundEmail) && (emailVerified == null || !emailVerified)) {
-                                        Toast.makeText(Login.this, "Vui lòng xác nhận email mới (" + pendingEmail + ") trước khi đăng nhập!", Toast.LENGTH_LONG).show();
-                                    } else {
-                                        performLogin(foundEmail, password);
-                                    }
+                                String email = task.getResult().getDocuments().get(0).getString("email");
+                                if (email != null) {
+                                    performLogin(email, password);
                                 } else {
-                                    Toast.makeText(Login.this, "Không tìm thấy email liên kết với username này", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(this, "Không tìm thấy email liên kết", Toast.LENGTH_SHORT).show();
                                 }
                             } else {
-                                Toast.makeText(Login.this, "Username không tồn tại", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(this, "Username không tồn tại", Toast.LENGTH_SHORT).show();
                             }
-                        })
-                        .addOnFailureListener(e -> {
-                            Toast.makeText(Login.this, "Lỗi khi tra cứu username: " + e.getMessage(), Toast.LENGTH_LONG).show();
                         });
             }
         });
     }
 
     private void checkEmailAndLogin(String email, String password) {
-        db.collection("users")
+        firebaseManager.getInstance().db.collection("users")
                 .whereEqualTo("email", email)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && !task.getResult().isEmpty()) {
                         String pendingEmail = task.getResult().getDocuments().get(0).getString("pendingEmail");
                         Boolean emailVerified = task.getResult().getDocuments().get(0).getBoolean("emailVerified");
-
                         if (pendingEmail != null && !pendingEmail.equals(email) && (emailVerified == null || !emailVerified)) {
-                            Toast.makeText(Login.this, "Vui lòng xác nhận email mới (" + pendingEmail + ") trước khi đăng nhập!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(this, "Vui lòng xác nhận email mới (" + pendingEmail + ")", Toast.LENGTH_LONG).show();
                         } else {
                             performLogin(email, password);
                         }
                     } else {
                         performLogin(email, password);
                     }
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(Login.this, "Lỗi khi kiểm tra email: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
     }
 
     private void performLogin(String email, String password) {
-        mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            if (user != null) {
-                                checkPendingEmailAndRole(user);
-                            }
-                        } else {
-                            Toast.makeText(Login.this, "Đăng nhập thất bại: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+        firebaseManager.getInstance().mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = firebaseManager.getCurrentUser();
+                        if (user != null) {
+                            checkPendingEmailAndRole(user);
                         }
+                    } else {
+                        Toast.makeText(this, "Đăng nhập thất bại: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                     }
                 });
     }
 
     private void checkPendingEmailAndRole(FirebaseUser user) {
-        db.collection("users").document(user.getUid())
-                .get()
-                .addOnSuccessListener(document -> {
-                    if (document.exists()) {
-                        String pendingEmail = document.getString("pendingEmail");
-                        Boolean emailVerified = document.getBoolean("emailVerified");
-                        String role = document.getString("role");
-
-                        if (pendingEmail != null && !pendingEmail.equals(user.getEmail()) && (emailVerified == null || !emailVerified)) {
-                            Toast.makeText(Login.this, "Vui lòng xác nhận email mới (" + pendingEmail + ") trước khi đăng nhập!", Toast.LENGTH_LONG).show();
-                        } else if (pendingEmail != null && !pendingEmail.equals(user.getEmail()) && user.isEmailVerified()) {
-                            Map<String, Object> updates = new HashMap<>();
-                            updates.put("email", pendingEmail);
-                            updates.put("pendingEmail", null);
-                            updates.put("emailVerified", true);
-
-                            db.collection("users").document(user.getUid())
-                                    .update(updates)
-                                    .addOnSuccessListener(aVoid -> {
-                                        redirectBasedOnRole(role);
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        Toast.makeText(Login.this, "Lỗi khi cập nhật email: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                                        mAuth.signOut();
-                                    });
-                        } else if (user.isEmailVerified()) {
-                            redirectBasedOnRole(role);
-                        } else {
-                            Toast.makeText(Login.this, "Email chưa được xác nhận. Vui lòng kiểm tra hộp thư!", Toast.LENGTH_LONG).show();
-                        }
-                    } else {
-                        Toast.makeText(Login.this, "Không tìm thấy dữ liệu người dùng", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(Login.this, "Lỗi khi kiểm tra dữ liệu: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                });
+        firebaseManager.loadUserData(user, userData -> {
+            if (userData.getPendingEmail() != null && !userData.getPendingEmail().equals(user.getEmail()) && !user.isEmailVerified()) {
+                Toast.makeText(this, "Vui lòng xác nhận email mới (" + userData.getPendingEmail() + ")", Toast.LENGTH_LONG).show();
+            } else if (user.isEmailVerified()) {
+                redirectBasedOnRole(userData.getRole());
+            } else {
+                Toast.makeText(this, "Email chưa được xác nhận!", Toast.LENGTH_LONG).show();
+            }
+        }, this);
     }
 
     private void redirectBasedOnRole(String role) {
-        if ("admin".equals(role)) {
-            Toast.makeText(Login.this, "Đăng nhập thành công với vai trò Admin", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(getApplicationContext(), AdminDashboard.class);
-            startActivity(intent);
-            finish();
-        } else {
-            Toast.makeText(Login.this, "Đăng nhập thành công với vai trò User", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(getApplicationContext(), Profile.class);
-            startActivity(intent);
-            finish();
-        }
+        Intent intent = "admin".equals(role) ?
+                new Intent(this, AdminDashboard.class) :
+                new Intent(this, Profile.class);
+        Toast.makeText(this, "Đăng nhập thành công với vai trò " + (role.equals("admin") ? "Admin" : "User"), Toast.LENGTH_SHORT).show();
+        startActivity(intent);
+        finish();
     }
 }

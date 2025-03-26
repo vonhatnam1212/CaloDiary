@@ -3,91 +3,62 @@ package com.example.calodiary;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.example.calodiary.databinding.ActivityForgetPasswordBinding;
+import com.example.calodiary.utils.FirebaseManager;
 
 public class ForgetPassword extends AppCompatActivity {
-
-    EditText editTextEmailOrUsername;
-    Button buttonReset;
-    ImageButton backButton;
-    FirebaseAuth mAuth;
-    FirebaseFirestore db;
+    private ActivityForgetPasswordBinding binding;
+    private FirebaseManager firebaseManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_forget_password);
+        binding = ActivityForgetPasswordBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
+        firebaseManager = FirebaseManager.getInstance();
 
-        editTextEmailOrUsername = findViewById(R.id.fullname_input); // Sử dụng id từ layout của bạn
-        buttonReset = findViewById(R.id.login_btn); // Nút "reset"
-        backButton = findViewById(R.id.back_button);
-
-        // Nút quay lại
-        backButton.setOnClickListener(v -> {
-            Intent intent = new Intent(getApplicationContext(), Login.class);
-            startActivity(intent);
+        binding.backButton.setOnClickListener(v -> {
+            startActivity(new Intent(this, Login.class));
             finish();
         });
 
-        // Nút Reset
-        buttonReset.setOnClickListener(v -> {
-            String input = editTextEmailOrUsername.getText().toString().trim();
-
+        binding.loginBtn.setOnClickListener(v -> {
+            String input = binding.fullnameInput.getText().toString().trim();
             if (TextUtils.isEmpty(input)) {
-                Toast.makeText(ForgetPassword.this, "Vui lòng nhập email hoặc username", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Vui lòng nhập email hoặc username", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             if (input.contains("@") && input.contains(".")) {
-                // Nếu là email, gửi link đặt lại mật khẩu trực tiếp
-                sendPasswordResetEmail(input);
+                firebaseManager.sendPasswordResetEmail(input, this, () -> {
+                    startActivity(new Intent(this, Login.class));
+                    finish();
+                });
             } else {
-                // Nếu là username, tra cứu email từ Firestore
-                db.collection("users")
+                firebaseManager.getInstance().getInstance().db.collection("users")
                         .whereEqualTo("username", input)
                         .get()
                         .addOnCompleteListener(task -> {
                             if (task.isSuccessful() && !task.getResult().isEmpty()) {
-                                String foundEmail = task.getResult().getDocuments().get(0).getString("email");
-                                if (foundEmail != null) {
-                                    sendPasswordResetEmail(foundEmail);
+                                String email = task.getResult().getDocuments().get(0).getString("email");
+                                if (email != null) {
+                                    firebaseManager.sendPasswordResetEmail(email, this, () -> {
+                                        startActivity(new Intent(this, Login.class));
+                                        finish();
+                                    });
                                 } else {
-                                    Toast.makeText(ForgetPassword.this, "Không tìm thấy email liên kết với username này", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(this, "Không tìm thấy email liên kết với username này", Toast.LENGTH_SHORT).show();
                                 }
                             } else {
-                                Toast.makeText(ForgetPassword.this, "Username không tồn tại", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(this, "Username không tồn tại", Toast.LENGTH_SHORT).show();
                             }
-                        })
-                        .addOnFailureListener(e -> {
-                            Toast.makeText(ForgetPassword.this, "Lỗi khi tra cứu username: " + e.getMessage(), Toast.LENGTH_LONG).show();
                         });
             }
         });
-    }
-
-    private void sendPasswordResetEmail(String email) {
-        mAuth.sendPasswordResetEmail(email)
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        Toast.makeText(ForgetPassword.this, "Email đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư!", Toast.LENGTH_LONG).show();
-                        Intent intent = new Intent(getApplicationContext(), Login.class);
-                        startActivity(intent);
-                        finish();
-                    } else {
-                        Toast.makeText(ForgetPassword.this, "Lỗi khi gửi email: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                });
     }
 }
