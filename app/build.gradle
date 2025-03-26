@@ -1,21 +1,20 @@
-// Plugins
 plugins {
     id 'com.android.application'
     id 'com.google.gms.google-services'
-    alias(libs.plugins.android.application)           // Từ Gradle 1
-    alias(libs.plugins.google.gms.google.services)    // Từ Gradle 1, cần cho Firebase
+//    alias(libs.plugins.android.application)           // Từ Gradle 1
+//    alias(libs.plugins.google.gms.google.services)    // Từ Gradle 1, cần cho Firebase
                    // Từ Gradle 2, giữ lại cho tương thích
 }
 
 // Android configuration
 android {
     namespace 'com.example.calodiary'
-    compileSdk 35                                  // Lấy phiên bản cao hơn từ Gradle 1
+    compileSdk 34                               // Lấy phiên bản cao hơn từ Gradle 1
 
     defaultConfig {
         applicationId "com.example.calodiary"
         minSdk 24                                     // Giữ nguyên từ cả hai
-        targetSdk 35                                // Lấy phiên bản cao hơn từ Gradle 1
+        targetSdk 34                          // Lấy phiên bản cao hơn từ Gradle 1
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -29,8 +28,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11    // Lấy phiên bản cao hơn từ Gradle 1
-        targetCompatibility JavaVersion.VERSION_11    // Lấy phiên bản cao hơn từ Gradle 1
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     buildFeatures {
@@ -42,17 +41,28 @@ android {
 dependencies {
     implementation 'androidx.core:core:1.9.0'
     // Firebase BOM và các thư viện Firebase
-    implementation platform(libs.firebase.bom)        // Từ Gradle 1, quản lý phiên bản Firebase
-    implementation libs.google.firebase.auth          // Firebase Authentication
-    implementation libs.firebase.firestore            // Firebase Firestore
-    implementation libs.firebase.storage              // Firebase Storage
+//    implementation platform(libs.firebase.bom)        // Từ Gradle 1, quản lý phiên bản Firebase
+//    implementation libs.google.firebase.auth          // Firebase Authentication
+//    implementation libs.firebase.firestore            // Firebase Firestore
+//    implementation libs.firebase.storage              // Firebase Storage
+//
+//    // Core AndroidX libraries từ Gradle 1
+//    implementation libs.appcompat                    // AndroidX AppCompat
+//    implementation libs.material                     // Material Components
+//    implementation libs.activity                     // Activity
+//    implementation libs.constraintlayout             // ConstraintLayout
+    implementation platform('com.google.firebase:firebase-bom:32.7.0')
 
-    // Core AndroidX libraries từ Gradle 1
-    implementation libs.appcompat                    // AndroidX AppCompat
-    implementation libs.material                     // Material Components
-    implementation libs.activity                     // Activity
-    implementation libs.constraintlayout             // ConstraintLayout
+    // Firebase Modules
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-firestore'
+    implementation 'com.google.firebase:firebase-storage'
 
+    // AndroidX Libraries
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'androidx.activity:activity-ktx:1.8.2'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     // Dependencies từ Gradle 2 (cập nhật phiên bản nếu cần)
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0' // Lấy phiên bản cao hơn từ Gradle 1
@@ -83,10 +93,4 @@ android {
         buildConfigField "String", "OPENAI_API_KEY", "\"${openAiApiKey}\""
     }
 
-    implementation 'com.google.code.gson:gson:2.10.1' // Giữ từ Gradle 2
-
-    // Testing dependencies
-    testImplementation 'junit:junit:4.13.2'           // Từ Gradle 2
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5' // Từ Gradle 2
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1' // Từ Gradle 2
 }

@@ -33,9 +33,11 @@
             android:name=".DisplayCreatedPostActivity"
             android:exported="true" />
         <activity
-            android:name=".LoginActivity" />
+            android:name=".LoginActivity"
+            android:exported="true" />
         <activity
-            android:name=".HomeActivity" />
+            android:name=".HomeActivity"
+            android:exported="true"/>
         <activity
             android:name=".AdminDashboard"
             android:exported="false" />
@@ -45,7 +47,8 @@
             android:exported="true"/>
         <!-- Launcher activity remains Login -->
         <activity
-            android:name=".MainActivity" />
+            android:name=".MainActivity"
+            android:exported="true"/>
         <activity
             android:name=".SplashActivity"
             android:exported="true"
