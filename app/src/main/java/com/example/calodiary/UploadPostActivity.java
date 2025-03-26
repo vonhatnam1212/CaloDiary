@@ -130,7 +130,12 @@ public class UploadPostActivity extends AppCompatActivity {
             return;
         }
 
-        Posts newPost = new Posts(title, content, authorId, status, imgPath, currentTime, currentTime);
+        if (title.length() > 100 || content.length() > 1500) {
+            Toast.makeText(this, "content length exceed 1500", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Posts newPost = new Posts(title, content, authorId, status, imgPath, false, currentTime, currentTime);
         newPost.setId(UUID.randomUUID().toString());
 
         db.collection("posts")
