@@ -65,37 +65,37 @@ public class AutoCreatePostWorker extends Worker {
             return Result.failure();
         }
 
-        CountDownLatch imageLatch = new CountDownLatch(1);
-
-        ChatGPTClient.generateImage("Hình ảnh minh họa về: " + generatedContent[0], new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Log.e("AutoCreatePostWorker", "DALL·E API call failed", e);
-                imageLatch.countDown();
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.isSuccessful() && response.body() != null) {
-                    String responseData = response.body().string();
-                    JsonObject jsonResponse = JsonParser.parseString(responseData).getAsJsonObject();
-                    JsonArray images = jsonResponse.getAsJsonArray("data");
-                    if (images != null && images.size() > 0) {
-                        generatedImage[0] = images.get(0).getAsJsonObject().get("url").getAsString();
-                    }
-                } else {
-                    Log.e("AutoCreatePostWorker", "Failed to get image from DALL·E");
-                }
-                imageLatch.countDown();
-            }
-        });
-
-        try {
-            imageLatch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return Result.failure();
-        }
+//        CountDownLatch imageLatch = new CountDownLatch(1);
+//
+//        ChatGPTClient.generateImage("Hình ảnh minh họa về: " + generatedContent[0], new Callback() {
+//            @Override
+//            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+//                Log.e("AutoCreatePostWorker", "DALL·E API call failed", e);
+//                imageLatch.countDown();
+//            }
+//
+//            @Override
+//            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+//                if (response.isSuccessful() && response.body() != null) {
+//                    String responseData = response.body().string();
+//                    JsonObject jsonResponse = JsonParser.parseString(responseData).getAsJsonObject();
+//                    JsonArray images = jsonResponse.getAsJsonArray("data");
+//                    if (images != null && images.size() > 0) {
+//                        generatedImage[0] = images.get(0).getAsJsonObject().get("url").getAsString();
+//                    }
+//                } else {
+//                    Log.e("AutoCreatePostWorker", "Failed to get image from DALL·E");
+//                }
+//                imageLatch.countDown();
+//            }
+//        });
+//
+//        try {
+//            imageLatch.await();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//            return Result.failure();
+//        }
 
         // Create a new PostAI object
         PostAI newPost = new PostAI(
@@ -103,7 +103,7 @@ public class AutoCreatePostWorker extends Worker {
                 generatedContent[0].isEmpty() ? "Bài viết tự động nhưng không có nội dung từ AI." : generatedContent[0],
                 "ai", // Replace with a valid authorId
                 "pending",
-                generatedImage[0], // Optional: Add Base64 image string if needed
+                "", // Optional: Add Base64 image string if needed
                 true,
                 Timestamp.now(),
                 Timestamp.now()
