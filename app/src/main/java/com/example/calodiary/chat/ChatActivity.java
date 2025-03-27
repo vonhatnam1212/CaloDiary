@@ -1,14 +1,22 @@
 package com.example.calodiary.chat;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.widget.Toast;
+
+import com.example.calodiary.ArticleActivity;
+import com.example.calodiary.HomeActivity;
+import com.example.calodiary.Profile;
 import com.example.calodiary.R;
 import com.google.firebase.firestore.*;
 
@@ -31,6 +39,10 @@ public class ChatActivity extends AppCompatActivity {
     private EditText inputMessage;
     private Button sendButton;
     private FirebaseFirestore db;
+    
+    // Custom bottom navigation views
+    private LinearLayout tabHome, tabBlog, tabChat, tabProfile;
+    private ImageView iconHome, iconBlog, iconChat, iconProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,8 +68,80 @@ public class ChatActivity extends AppCompatActivity {
         }
 
         loadChatHistory(sessionId);
+        setupCustomBottomNavigation();
 
         sendButton.setOnClickListener(v -> sendMessage(sessionId));
+    }
+    
+    private void setupCustomBottomNavigation() {
+        // Initialize bottom navigation
+        View bottomNav = findViewById(R.id.bottomNavigation);
+        tabHome = bottomNav.findViewById(R.id.tab_home);
+        tabBlog = bottomNav.findViewById(R.id.tab_blog);
+        tabChat = bottomNav.findViewById(R.id.tab_chat);
+        tabProfile = bottomNav.findViewById(R.id.tab_profile);
+        
+        iconHome = bottomNav.findViewById(R.id.icon_home);
+        iconBlog = bottomNav.findViewById(R.id.icon_blog);
+        iconChat = bottomNav.findViewById(R.id.icon_chat);
+        iconProfile = bottomNav.findViewById(R.id.icon_profile);
+        
+        // Set chat tab as selected
+        setSelectedTab(tabChat, iconChat);
+        
+        // Set click listeners for each tab
+        tabHome.setOnClickListener(v -> {
+            setSelectedTab(tabHome, iconHome);
+            navigateToActivity(HomeActivity.class);
+        });
+        
+        tabBlog.setOnClickListener(v -> {
+            setSelectedTab(tabBlog, iconBlog);
+            navigateToActivity(ArticleActivity.class);
+        });
+        
+        tabChat.setOnClickListener(v -> {
+            if (!isCurrentActivity(ChatActivity.class)) {
+                setSelectedTab(tabChat, iconChat);
+                // Already in ChatActivity
+            }
+        });
+        
+        tabProfile.setOnClickListener(v -> {
+            setSelectedTab(tabProfile, iconProfile);
+            navigateToActivity(Profile.class);
+        });
+    }
+    
+    private void setSelectedTab(LinearLayout tab, ImageView icon) {
+        // Reset all tabs to unselected state
+        tabHome.setSelected(false);
+        tabBlog.setSelected(false);
+        tabChat.setSelected(false);
+        tabProfile.setSelected(false);
+        
+        iconHome.setColorFilter(getResources().getColor(android.R.color.darker_gray));
+        iconBlog.setColorFilter(getResources().getColor(android.R.color.darker_gray));
+        iconChat.setColorFilter(getResources().getColor(android.R.color.darker_gray));
+        iconProfile.setColorFilter(getResources().getColor(android.R.color.darker_gray));
+        
+        // Set selected tab
+        tab.setSelected(true);
+        icon.setColorFilter(getResources().getColor(R.color.primary));
+    }
+    
+    private boolean isCurrentActivity(Class<?> activityClass) {
+        return getClass().getName().equals(activityClass.getName());
+    }
+    
+    private void navigateToActivity(Class<?> destinationActivity) {
+        try {
+            Intent intent = new Intent(this, destinationActivity);
+            startActivity(intent);
+            finish(); // Finish current activity to avoid stacking
+        } catch (Exception e) {
+            Toast.makeText(this, "Không thể mở màn hình này", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void sendMessage(String sessionId) {
