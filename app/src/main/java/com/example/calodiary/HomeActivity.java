@@ -21,6 +21,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.text.SimpleDateFormat;
@@ -150,8 +151,8 @@ public class HomeActivity extends AppCompatActivity {
         db.collection("meals")
             .whereEqualTo("userId", userId)
             .whereEqualTo("date", today)
-            .orderBy("timestamp", Query.Direction.DESCENDING)
-            .limit(5)
+//            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .limit(10)
             .get()
             .addOnSuccessListener(queryDocuments -> {
                 List<Meal> meals = new ArrayList<>();
@@ -161,6 +162,8 @@ public class HomeActivity extends AppCompatActivity {
                         meals.add(meal);
                     }
                 }
+                Collections.sort(meals, (m1, m2) ->
+                        Long.compare(m2.getTimestamp(), m1.getTimestamp()));
                 mealsAdapter.setMeals(meals);
             });
     }

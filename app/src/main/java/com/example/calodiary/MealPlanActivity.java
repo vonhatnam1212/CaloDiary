@@ -96,6 +96,7 @@ public class MealPlanActivity extends AppCompatActivity {
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         rvMealHistory = findViewById(R.id.rvMealHistory);
         tvCalorieProgress = findViewById(R.id.tvCalorieProgress);
@@ -176,7 +177,7 @@ public class MealPlanActivity extends AppCompatActivity {
 
         db.collection("meals")
             .whereEqualTo("userId", userId)
-            .orderBy("timestamp", Query.Direction.DESCENDING)
+//            .orderBy("timestamp", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener(queryDocuments -> {
                 List<Meal> meals = new ArrayList<>();
@@ -193,7 +194,8 @@ public class MealPlanActivity extends AppCompatActivity {
                         }
                     }
                 }
-
+                Collections.sort(meals, (m1, m2) ->
+                        Long.compare(m2.getTimestamp(), m1.getTimestamp()));
                 mealAdapter.setMeals(meals);
                 updateCalorieProgress(todayCalories);
                 showLoading(false);

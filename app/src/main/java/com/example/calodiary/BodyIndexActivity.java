@@ -73,6 +73,12 @@ public class BodyIndexActivity extends AppCompatActivity {
         tvBMICategory = findViewById(R.id.tvBMICategory);
         btnSave = findViewById(R.id.btnSave);
         spinnerActivityLevel = findViewById(R.id.spinnerActivityLevel);
+        
+        // Setup Toolbar
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
     }
 
     private void loadLastMeasurement() {
