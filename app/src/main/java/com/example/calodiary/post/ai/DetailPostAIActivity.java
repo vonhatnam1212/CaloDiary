@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -82,7 +83,9 @@ public class DetailPostAIActivity extends AppCompatActivity{
         rejectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 updatePostStatus("rejected");
+                Toast.makeText(v.getContext(), "Bài viết đã bị từ chối", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -91,6 +94,7 @@ public class DetailPostAIActivity extends AppCompatActivity{
             @Override
             public void onClick(View v) {
                 updatePostStatus("approved");
+                Toast.makeText(v.getContext(), "Bài viết đã được chấp nhận", Toast.LENGTH_SHORT).show();
             }
         });
 //
