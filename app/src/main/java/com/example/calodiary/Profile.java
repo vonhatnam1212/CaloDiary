@@ -10,7 +10,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.calodiary.databinding.ActivityProfileBinding;
-import com.example.calodiary.model.User;
+import com.example.calodiary.Model.User;
 import com.example.calodiary.utils.FirebaseManager;
 import com.google.firebase.auth.FirebaseUser;
 

@@ -9,7 +9,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.example.calodiary.model.User;
+import com.example.calodiary.Model.User;
 
 import java.util.function.Consumer;
 

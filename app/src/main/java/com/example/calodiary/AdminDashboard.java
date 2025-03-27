@@ -2,11 +2,13 @@ package com.example.calodiary;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.calodiary.post.ai.ListPostAIActivity;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class AdminDashboard extends AppCompatActivity {
@@ -22,6 +24,8 @@ public class AdminDashboard extends AppCompatActivity {
 
         Button manageUsersButton = findViewById(R.id.manageUsersButton);
         Button logoutButton = findViewById(R.id.logoutButton);
+        Button crudPostManual = findViewById(R.id.crudPostManual);
+        Button postAi = findViewById(R.id.postAi);
 
         manageUsersButton.setOnClickListener(v -> {
             Toast.makeText(this, "Chức năng quản lý người dùng (chưa triển khai)", Toast.LENGTH_SHORT).show();
@@ -36,5 +40,22 @@ public class AdminDashboard extends AppCompatActivity {
             startActivity(intent);
             finish();
         });
+
+        crudPostManual.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(AdminDashboard.this, DisplayCreatedPostActivity.class);
+                startActivity(intent);
+            }
+        });
+        postAi.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(AdminDashboard.this, ListPostAIActivity.class);
+                startActivity(intent);
+            }
+        });
+
+
     }
 }
