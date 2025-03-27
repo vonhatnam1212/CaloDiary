@@ -31,13 +31,12 @@ public class MainActivity extends AppCompatActivity {
         button = findViewById(R.id.logout);
         textView = findViewById(R.id.user_details);
         user = auth.getCurrentUser();
-        if(user == null){
-            Intent intent = new Intent(getApplicationContext(), Login.class);
+        if (user != null) {
+            textView.setText(user.getEmail());
+        } else {
+            Intent intent = new Intent(this, Login.class);
             startActivity(intent);
             finish();
-        }
-        else {
-            textView.setText(user. getEmail());
         }
 
         button.setOnClickListener(new View.OnClickListener() {

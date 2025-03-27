@@ -68,4 +68,12 @@ public class User {
     public void setActivityLevel(String activityLevel) {
         this.activityLevel = activityLevel;
     }
+
+    public double getActivityLevelValue() {
+        try {
+            return Double.parseDouble(activityLevel);
+        } catch (Exception e) {
+            return 1.2; // Default activity level if parsing fails
+        }
+    }
 } 

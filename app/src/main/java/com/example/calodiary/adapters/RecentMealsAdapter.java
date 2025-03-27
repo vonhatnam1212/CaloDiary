@@ -1,4 +1,4 @@
-package com.example.calodiary;
+package com.example.calodiary.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -6,11 +6,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.example.calodiary.R;
+import com.example.calodiary.models.Meal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class RecentMealsAdapter extends RecyclerView.Adapter<RecentMealsAdapter.MealViewHolder> {
     private List<Meal> meals;
@@ -23,7 +23,7 @@ public class RecentMealsAdapter extends RecyclerView.Adapter<RecentMealsAdapter.
     @Override
     public MealViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_recent_meal, parent, false);
+            .inflate(R.layout.item_recent_meal, parent, false);
         return new MealViewHolder(view);
     }
 
@@ -40,7 +40,7 @@ public class RecentMealsAdapter extends RecyclerView.Adapter<RecentMealsAdapter.
     }
 
     public void setMeals(List<Meal> meals) {
-        this.meals = meals != null ? meals : new ArrayList<>();
+        this.meals = meals;
         notifyDataSetChanged();
     }
 
@@ -52,6 +52,7 @@ public class RecentMealsAdapter extends RecyclerView.Adapter<RecentMealsAdapter.
 
         public MealViewHolder(@NonNull View itemView) {
             super(itemView);
+            // Đảm bảo các ID này khớp với layout item_recent_meal.xml
             tvMealName = itemView.findViewById(R.id.tvMealName);
             tvMealType = itemView.findViewById(R.id.tvMealType);
             tvCalories = itemView.findViewById(R.id.tvCalories);
@@ -70,9 +71,9 @@ public class RecentMealsAdapter extends RecyclerView.Adapter<RecentMealsAdapter.
                     tvCalories.setText(String.format(Locale.getDefault(), 
                         "%d calories", meal.getCalories()));
                 }
-//                if (tvDate != null) {
-//                    tvDate.setText();
-//                }
+                if (tvDate != null) {
+                    tvDate.setText(meal.getDate());
+                }
             }
         }
     }

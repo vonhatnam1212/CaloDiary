@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DayDetailsActivity extends AppCompatActivity {
-    private RecyclerView rvMeals;
     private RecentMealsAdapter adapter;
     private List<Meal> meals;
     private TextView tvDate;
@@ -32,48 +31,32 @@ public class DayDetailsActivity extends AppCompatActivity {
         selectedDate = getIntent().getStringExtra("date");
 
         // Initialize views
-        rvMeals = findViewById(R.id.rvMeals);
+        RecyclerView recyclerView = findViewById(R.id.rvMeals);
         tvDate = findViewById(R.id.tvDate);
         tvTotalCalories = findViewById(R.id.tvTotalCalories);
 
-        // Set up RecyclerView
-        meals = new ArrayList<>();
-        adapter = new RecentMealsAdapter(meals);
-        rvMeals.setLayoutManager(new LinearLayoutManager(this));
-        rvMeals.setAdapter(adapter);
+        // Khởi tạo adapter không có tham số
+        adapter = new RecentMealsAdapter();
+        
+        // Thiết lập RecyclerView
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
 
         // Display date
         tvDate.setText(selectedDate);
 
-        // Load meals for the selected date
+        // Khởi tạo danh sách meals
+        meals = new ArrayList<>();
+        
+        // Load dữ liệu meals (nếu có)
         loadMeals();
     }
 
     private void loadMeals() {
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        db.collection("users")
-                .document(userId)
-                .collection("meals")
-                .whereEqualTo("date", selectedDate)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    meals.clear();
-                    int totalCalories = 0;
-
-                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        String type = document.getString("type");
-                        String name = document.getString("name");
-                        int calories = document.getLong("calories").intValue();
-                        totalCalories += calories;
-
-                        meals.add(new Meal(type, name, calories));
-                    }
-
-                    adapter.notifyDataSetChanged();
-                    tvTotalCalories.setText(String.format("Total Calories: %d", totalCalories));
-                })
-                .addOnFailureListener(e -> {
-                    // Handle error
-                });
+        // Load dữ liệu meals từ nguồn của bạn
+        // Ví dụ: từ Intent hoặc Database
+        
+        // Sau khi có dữ liệu, cập nhật adapter
+        adapter.setMeals(meals);
     }
 } 

@@ -68,7 +68,7 @@ public class Profile extends AppCompatActivity {
             builder.show();
         });
 
-        binding.bottomNavigationView.setSelectedItemId(R.id.profile);
+//        binding.bottomNavigationView.setSelectedItemId(R.id.profile);
         // binding.bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
         //     int itemId = item.getItemId();
         //     if (itemId == R.id.home || itemId == R.id.blog) {
