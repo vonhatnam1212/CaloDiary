@@ -145,7 +145,7 @@ public class BodyIndexActivity extends AppCompatActivity {
             // Display results
             DecimalFormat df = new DecimalFormat("#.##");
             tvBMI.setText(df.format(bmi));
-            
+
             // Set BMI category
             String category;
             if (bmi < 18.5) {
@@ -158,7 +158,7 @@ public class BodyIndexActivity extends AppCompatActivity {
                 category = "Béo phì";
             }
             tvBMICategory.setText(category);
-            
+
             // Set calories
             tvCalories.setText(Math.round(tdee) + " kcal/ngày");
 
@@ -190,14 +190,14 @@ public class BodyIndexActivity extends AppCompatActivity {
     private void showResultDialog(float bmi, String category, double tdee) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Kết quả tính toán")
-               .setMessage(String.format(
-                   "BMI: %.2f\nPhân loại: %s\nLượng calo cần thiết: %.0f kcal/ngày",
-                   bmi, category, tdee))
-               .setPositiveButton("Lập thực đơn", (dialog, which) -> {
-                   Intent intent = new Intent( BodyIndexActivity.this, MealPlanActivity.class);
-                   startActivity(intent);
-               })
-               .setNegativeButton("Đóng", null)
-               .show();
+                .setMessage(String.format(
+                        "BMI: %.2f\nPhân loại: %s\nLượng calo cần thiết: %.0f kcal/ngày",
+                        bmi, category, tdee))
+                .setPositiveButton("Lập thực đơn", (dialog, which) -> {
+                    Intent intent = new Intent( BodyIndexActivity.this, MealPlanActivity.class);
+                    startActivity(intent);
+                })
+                .setNegativeButton("Đóng", null)
+                .show();
     }
-} 
+}
