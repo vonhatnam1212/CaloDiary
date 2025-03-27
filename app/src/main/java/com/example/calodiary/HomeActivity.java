@@ -13,6 +13,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.calodiary.chat.ChatHistoryActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -227,11 +229,7 @@ public class HomeActivity extends AppCompatActivity {
         tabChat.setOnClickListener(v -> {
             setSelectedTab(tabChat, iconChat);
             // Navigate to Chat - Assume you have a ChatActivity class
-            try {
-                navigateToActivity(Class.forName("com.example.calodiary.ChatActivity"));
-            } catch (ClassNotFoundException e) {
-                Toast.makeText(this, "Chat feature coming soon", Toast.LENGTH_SHORT).show();
-            }
+            navigateToActivity(ChatHistoryActivity.class);
         });
         
         tabProfile.setOnClickListener(v -> {
