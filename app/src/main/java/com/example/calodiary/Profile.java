@@ -69,14 +69,14 @@ public class Profile extends AppCompatActivity {
         });
 
         binding.bottomNavigationView.setSelectedItemId(R.id.profile);
-        binding.bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
-            int itemId = item.getItemId();
-            if (itemId == R.id.home || itemId == R.id.blog) {
-                Toast.makeText(this, "Not implemented yet", Toast.LENGTH_SHORT).show();
-                return false;
-            }
-            return itemId == R.id.profile;
-        });
+        // binding.bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+        //     int itemId = item.getItemId();
+        //     if (itemId == R.id.home || itemId == R.id.blog) {
+        //         Toast.makeText(this, "Not implemented yet", Toast.LENGTH_SHORT).show();
+        //         return false;
+        //     }
+        //     return itemId == R.id.profile;
+        // });
 
         loadUserData();
     }

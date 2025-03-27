@@ -1,8 +1,5 @@
 package com.example.calodiary;
 
-import android.annotation.SuppressLint;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -10,194 +7,81 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-
-import java.text.DecimalFormat;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BodyIndexActivity extends AppCompatActivity {
-    private EditText etAge, etWeight, etHeight, etActivity;
+    private EditText etAge;
+    private EditText etWeight;
+    private EditText etHeight;
+    private EditText etActivity;
     private RadioGroup rgGender;
-    private TextView tvBMI, tvBMICategory, tvCalories;
+    private TextView tvCalories;
     private Button btnCalculate;
     private LinearLayout resultLayout;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_body_index);
-        initializeViews();
-        setupClickListeners();
-    }
 
-    private void initializeViews() {
+        // Initialize Firebase
+        db = FirebaseFirestore.getInstance();
+
+        // Initialize views
         etAge = findViewById(R.id.etAge);
         etWeight = findViewById(R.id.etWeight);
         etHeight = findViewById(R.id.etHeight);
         etActivity = findViewById(R.id.etActivity);
         rgGender = findViewById(R.id.rgGender);
-        tvBMI = findViewById(R.id.tvBMI);
-        tvBMICategory = findViewById(R.id.tvBMICategory);
         tvCalories = findViewById(R.id.tvCalories);
         btnCalculate = findViewById(R.id.btnCalculate);
         resultLayout = findViewById(R.id.resultLayout);
+
+        btnCalculate.setOnClickListener(v -> calculateCalories());
     }
 
-    private void setupClickListeners() {
-        btnCalculate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (validateInput()) {
-                    calculateAndDisplayResults();
-                }
-            }
-        });
-    }
-
-    private boolean validateInput() {
-        String ageStr = etAge.getText().toString().trim();
-        String weightStr = etWeight.getText().toString().trim();
-        String heightStr = etHeight.getText().toString().trim();
-        String activityStr = etActivity.getText().toString().trim();
-
-        // Kiểm tra trống
-        if (ageStr.isEmpty()) {
-            etAge.setError("Vui lòng nhập tuổi");
-            return false;
-        }
-        if (weightStr.isEmpty()) {
-            etWeight.setError("Vui lòng nhập cân nặng");
-            return false;
-        }
-        if (heightStr.isEmpty()) {
-            etHeight.setError("Vui lòng nhập chiều cao");
-            return false;
-        }
-        if (activityStr.isEmpty()) {
-            etActivity.setError("Vui lòng nhập mức độ vận động");
-            return false;
-        }
-
+    private void calculateCalories() {
         try {
-            int age = Integer.parseInt(ageStr);
-            float weight = Float.parseFloat(weightStr);
-            float height = Float.parseFloat(heightStr);
-            int activity = Integer.parseInt(activityStr);
-
-            if (age < 15 || age > 80) {
-                etAge.setError("Tuổi phải từ 15-80");
-                return false;
-            }
-            if (weight < 30 || weight > 200) {
-                etWeight.setError("Cân nặng phải từ 30-200 kg");
-                return false;
-            }
-            if (height < 140 || height > 220) {
-                etHeight.setError("Chiều cao phải từ 140-220 cm");
-                return false;
-            }
-            if (activity < 1 || activity > 5) {
-                etActivity.setError("Mức độ vận động từ 1-5");
-                return false;
-            }
-        } catch (NumberFormatException e) {
-            Toast.makeText(this, "Vui lòng nhập đúng định dạng số", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-
-        return true;
-    }
-
-    @SuppressLint("SetTextI18n")
-    private void calculateAndDisplayResults() {
-        try {
-            float weight = Float.parseFloat(etWeight.getText().toString());
-            float height = Float.parseFloat(etHeight.getText().toString()) / 100; // Convert to meters
             int age = Integer.parseInt(etAge.getText().toString());
-            int activity = Integer.parseInt(etActivity.getText().toString());
+            double weight = Double.parseDouble(etWeight.getText().toString());
+            double height = Double.parseDouble(etHeight.getText().toString());
+            double activityLevel = Double.parseDouble(etActivity.getText().toString());
             boolean isMale = rgGender.getCheckedRadioButtonId() == R.id.rbMale;
 
-            // Calculate BMI
-            float bmi = weight / (height * height);
-
-            // Calculate BMR
+            // Mifflin-St Jeor Equation
             double bmr;
             if (isMale) {
-                bmr = 88.362 + (13.397 * weight) + (4.799 * height * 100) - (5.677 * age);
+                bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
             } else {
-                bmr = 447.593 + (9.247 * weight) + (3.098 * height * 100) - (4.330 * age);
+                bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161;
             }
+            double dailyCalories = bmr * activityLevel;
 
-            // Calculate TDEE
-            double activityFactor;
-            switch (activity) {
-                case 1: activityFactor = 1.2; break;
-                case 2: activityFactor = 1.375; break;
-                case 3: activityFactor = 1.55; break;
-                case 4: activityFactor = 1.725; break;
-                case 5: activityFactor = 1.9; break;
-                default: activityFactor = 1.2;
-            }
-            double tdee = bmr * activityFactor;
-
-            // Display results
-            DecimalFormat df = new DecimalFormat("#.##");
-            tvBMI.setText(df.format(bmi));
-
-            // Set BMI category
-            String category;
-            if (bmi < 18.5) {
-                category = "Thiếu cân";
-            } else if (bmi < 24.9) {
-                category = "Bình thường";
-            } else if (bmi < 29.9) {
-                category = "Thừa cân";
-            } else {
-                category = "Béo phì";
-            }
-            tvBMICategory.setText(category);
-
-            // Set calories
-            tvCalories.setText(Math.round(tdee) + " kcal/ngày");
-
-            // Show results
+            // Display result
+            tvCalories.setText(String.format("%.0f calories", dailyCalories));
             resultLayout.setVisibility(View.VISIBLE);
 
-            // Lưu kết quả
-            SharedPreferences sharedPreferences = getSharedPreferences("CaloDiaryPrefs", MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putFloat("bmi", bmi);
-            editor.putString("bmiCategory", category);
-            editor.putFloat("dailyCalories", (float) tdee);
-            editor.putFloat("weight", weight);
-            editor.putFloat("height", height);
-            editor.putInt("age", age);
-            editor.putInt("activityLevel", activity);
-            editor.putBoolean("isMale", isMale);
-            editor.apply();
-
-            // Hiển thị dialog kết quả và chuyển hướng
-            showResultDialog(bmi, category, tdee);
-
-        } catch (Exception e) {
-            Toast.makeText(this, "Có lỗi xảy ra, vui lòng thử lại", Toast.LENGTH_SHORT).show();
+            // Save to Firebase
+            saveUserData(age, weight, height, isMale ? "Male" : "Female", String.valueOf(activityLevel));
+        } catch (NumberFormatException e) {
+            // Handle invalid input
         }
     }
 
-    @SuppressLint("DefaultLocale")
-    private void showResultDialog(float bmi, String category, double tdee) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Kết quả tính toán")
-                .setMessage(String.format(
-                        "BMI: %.2f\nPhân loại: %s\nLượng calo cần thiết: %.0f kcal/ngày",
-                        bmi, category, tdee))
-                .setPositiveButton("Lập thực đơn", (dialog, which) -> {
-                    Intent intent = new Intent( BodyIndexActivity.this, MealPlanActivity.class);
-                    startActivity(intent);
-                })
-                .setNegativeButton("Đóng", null)
-                .show();
+    private void saveUserData(int age, double weight, double height, String gender, String activityLevel) {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        Map<String, Object> userData = new HashMap<>();
+        userData.put("age", age);
+        userData.put("weight", weight);
+        userData.put("height", height);
+        userData.put("gender", gender);
+        userData.put("activityLevel", activityLevel);
+
+        db.collection("users").document(userId).set(userData);
     }
 }

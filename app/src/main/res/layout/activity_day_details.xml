@@ -6,38 +6,25 @@
     android:padding="16dp">
 
     <TextView
+        android:id="@+id/tvDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Weekly Meal Calendar"
         android:textSize="24sp"
         android:textStyle="bold"
         android:layout_marginBottom="16dp"/>
 
     <TextView
-        android:id="@+id/tvWeekRange"
+        android:id="@+id/tvTotalCalories"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="18sp"
+        android:textColor="@color/purple_500"
         android:layout_marginBottom="16dp"/>
 
-    <LinearLayout
-        android:id="@+id/weekView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="16dp"/>
-
-    <TextView
-        android:id="@+id/tvDailyCalories"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:layout_marginBottom="8dp"/>
-
-    <ListView
-        android:id="@+id/listViewDays"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvMeals"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"/>
 
-</LinearLayout>
+</LinearLayout> 

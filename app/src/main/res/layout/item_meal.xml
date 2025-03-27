@@ -3,26 +3,28 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="8dp"
+    android:background="@android:color/white"
+    android:layout_margin="4dp">
 
     <TextView
         android:id="@+id/tvMealType"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:textColor="@color/purple_500"/>
+        android:textSize="16sp"
+        android:textStyle="bold"/>
 
     <TextView
         android:id="@+id/tvMealName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:textSize="16sp"/>
+        android:textSize="14sp"/>
 
     <TextView
         android:id="@+id/tvMealCalories"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"/>
+        android:textSize="14sp"
+        android:textColor="@android:color/holo_blue_dark"/>
 
-</LinearLayout> 
+</LinearLayout>

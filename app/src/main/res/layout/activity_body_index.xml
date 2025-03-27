@@ -6,154 +6,93 @@
     android:padding="16dp">
 
     <TextView
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Tính chỉ số cơ thể"
+        android:text="Body Index Calculator"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:gravity="center"
-        android:layout_marginBottom="24dp"/>
+        android:layout_marginBottom="16dp"/>
 
     <EditText
         android:id="@+id/etAge"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Tuổi"
+        android:hint="Age"
         android:inputType="number"
-        android:layout_marginBottom="16dp"
-        android:padding="12dp"
-        android:background="@drawable/rounded_corner_text"/>
+        android:layout_marginBottom="8dp"/>
+
+    <EditText
+        android:id="@+id/etWeight"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Weight (kg)"
+        android:inputType="numberDecimal"
+        android:layout_marginBottom="8dp"/>
+
+    <EditText
+        android:id="@+id/etHeight"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Height (cm)"
+        android:inputType="numberDecimal"
+        android:layout_marginBottom="8dp"/>
 
     <RadioGroup
         android:id="@+id/rgGender"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginBottom="16dp">
+        android:layout_marginBottom="8dp">
 
         <RadioButton
             android:id="@+id/rbMale"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Nam"
-            android:checked="true"
-            android:layout_marginEnd="32dp"/>
+            android:text="Male"
+            android:layout_marginEnd="16dp"/>
 
         <RadioButton
             android:id="@+id/rbFemale"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Nữ"/>
+            android:text="Female"/>
     </RadioGroup>
-
-    <EditText
-        android:id="@+id/etWeight"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Cân nặng (kg)"
-        android:inputType="numberDecimal"
-        android:layout_marginBottom="16dp"
-        android:padding="12dp"
-        android:background="@drawable/rounded_corner_text"/>
-
-    <EditText
-        android:id="@+id/etHeight"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Chiều cao (cm)"
-        android:inputType="numberDecimal"
-        android:layout_marginBottom="16dp"
-        android:padding="12dp"
-        android:background="@drawable/rounded_corner_text"/>
 
     <EditText
         android:id="@+id/etActivity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Mức độ vận động (1-5)"
-        android:inputType="number"
-        android:layout_marginBottom="24dp"
-        android:padding="12dp"
-        android:background="@drawable/rounded_corner_text"/>
+        android:hint="Activity Level (1.2-1.9)"
+        android:inputType="numberDecimal"
+        android:layout_marginBottom="16dp"/>
 
     <Button
         android:id="@+id/btnCalculate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Tính toán"
-        android:background="@drawable/rounded_corner_btn_login"
-        android:textColor="@color/white"
-        android:layout_marginBottom="24dp"/>
+        android:text="Calculate"/>
 
     <LinearLayout
         android:id="@+id/resultLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@drawable/rounded_corner_text"
-        android:padding="16dp"
-        android:visibility="gone">
+        android:visibility="gone"
+        android:layout_marginTop="16dp">
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Kết quả"
-            android:textSize="18sp"
+            android:text="Daily Calorie Needs:"
+            android:textSize="18sp"/>
+
+        <TextView
+            android:id="@+id/tvCalories"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="24sp"
             android:textStyle="bold"
-            android:layout_marginBottom="16dp"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Chỉ số BMI: "
-                android:textStyle="bold"/>
-
-            <TextView
-                android:id="@+id/tvBMI"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Phân loại: "
-                android:textStyle="bold"/>
-
-            <TextView
-                android:id="@+id/tvBMICategory"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Calo cần thiết: "
-                android:textStyle="bold"/>
-
-            <TextView
-                android:id="@+id/tvCalories"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-        </LinearLayout>
+            android:textColor="@android:color/holo_blue_dark"/>
     </LinearLayout>
 
-</LinearLayout>
+</LinearLayout> 

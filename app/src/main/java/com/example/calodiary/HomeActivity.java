@@ -1,90 +1,133 @@
 package com.example.calodiary;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class HomeActivity extends AppCompatActivity {
+    private TextView tvWelcome;
+    private TextView tvCalories;
+    private RecyclerView rvRecentMeals;
+    private RecentMealsAdapter recentMealsAdapter;
+    private List<Meal> recentMeals;
+    private FirebaseFirestore db;
+    private double dailyCalories;
 
-    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        // Hiển thị tên người dùng
-        TextView tvWelcome = findViewById(R.id.tvWelcome);
-        SharedPreferences sharedPreferences = getSharedPreferences("CaloDiaryPrefs", MODE_PRIVATE);
-        String username = sharedPreferences.getString("username", "");
-        tvWelcome.setText("Xin chào, " + username + "!");
+        // Initialize Firebase
+        db = FirebaseFirestore.getInstance();
 
-        // Xử lý click các cardview
-        CardView cvCalorie = findViewById(R.id.cvCalorie);
-        CardView cvFood = findViewById(R.id.cvFood);
-        CardView cvCalendar = findViewById(R.id.cvCalendar);
-        CardView cvProfile = findViewById(R.id.cvProfile);
+        // Initialize views
+        tvWelcome = findViewById(R.id.tvWelcome);
+        tvCalories = findViewById(R.id.tvCalories);
+        rvRecentMeals = findViewById(R.id.rvRecentMeals);
 
-        cvCalorie.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(HomeActivity.this, BodyIndexActivity.class);
-                startActivity(intent);
+        // Set up RecyclerView
+        recentMeals = new ArrayList<>();
+        recentMealsAdapter = new RecentMealsAdapter(recentMeals);
+        rvRecentMeals.setLayoutManager(new LinearLayoutManager(this));
+        rvRecentMeals.setAdapter(recentMealsAdapter);
+
+        // Setup bottom navigation
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+        bottomNav.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.home) {
+                // Already on home
+                return true;
+            } else if (itemId == R.id.blog) {
+                // Handle blog navigation if needed
+                return true;
+            } else if (itemId == R.id.AIchat) {
+                // Handle AI chat navigation if needed
+                return true;
+            } else if (itemId == R.id.profile) {
+                startActivity(new Intent(this, Profile.class));
+                return true;
             }
+            return false;
         });
 
-        cvFood.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(HomeActivity.this, MealPlanActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        cvCalendar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(HomeActivity.this, CalendarActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        cvProfile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(HomeActivity.this, ProfileActivity.class);
-                startActivity(intent);
-            }
-        });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_logout) {
-            // Xóa trạng thái đăng nhập
-            SharedPreferences sharedPreferences = getSharedPreferences("CaloDiaryPrefs", MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.clear();
-            editor.apply();
-
-            // Chuyển về màn hình đăng nhập
-            Intent intent = new Intent(this, LoginActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        // Setup click listeners for cards in home screen
+        findViewById(R.id.cardBodyIndex).setOnClickListener(v -> {
+            Intent intent = new Intent(this, BodyIndexActivity.class);
             startActivity(intent);
-            return true;
+        });
+
+        findViewById(R.id.cardMealPlan).setOnClickListener(v -> {
+            Intent intent = new Intent(this, MealPlanActivity.class);
+            startActivity(intent);
+        });
+
+        findViewById(R.id.cardCalendar).setOnClickListener(v -> {
+            Intent intent = new Intent(this, CalendarActivity.class);
+            startActivity(intent);
+        });
+
+        // Load user data and recent meals
+        loadUserData();
+        loadRecentMeals();
+    }
+
+    private void loadUserData() {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        db.collection("users").document(userId).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    User userData = documentSnapshot.toObject(User.class);
+                    if (userData != null) {
+                        tvWelcome.setText(String.format("Welcome, %s!", userData.getName()));
+                        dailyCalories = calculateDailyCalories(userData);
+                        tvCalories.setText(String.format("Daily Calorie Goal: %d", (int) dailyCalories));
+                    }
+                });
+    }
+
+    private void loadRecentMeals() {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        db.collection("users")
+                .document(userId)
+                .collection("meals")
+                .orderBy("date", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .limit(5)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    recentMeals.clear();
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        Map<String, Object> data = document.getData();
+                        String type = (String) data.get("type");
+                        String name = (String) data.get("name");
+                        int calories = ((Long) data.get("calories")).intValue();
+                        recentMeals.add(new Meal(type, name, calories));
+                    }
+                    recentMealsAdapter.notifyDataSetChanged();
+                });
+    }
+
+    private double calculateDailyCalories(User userData) {
+        // Mifflin-St Jeor Equation
+        double bmr;
+        if (userData.getGender().equals("Male")) {
+            bmr = (10 * userData.getWeight()) + (6.25 * userData.getHeight()) - (5 * userData.getAge()) + 5;
+        } else {
+            bmr = (10 * userData.getWeight()) + (6.25 * userData.getHeight()) - (5 * userData.getAge()) - 161;
         }
-        return super.onOptionsItemSelected(item);
+        return bmr * Double.parseDouble(userData.getActivityLevel());
     }
 }
