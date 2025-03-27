@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,7 +36,10 @@ public class HomeActivity extends AppCompatActivity {
     private TextView tvWelcome, tvCalorieGoal;
     private RecyclerView rvRecentMeals;
     private RecentMealsAdapter mealsAdapter;
-    private BottomNavigationView bottomNav;
+    
+    // Custom bottom navigation views
+    private LinearLayout tabHome, tabBlog, tabChat, tabProfile;
+    private ImageView iconHome, iconBlog, iconChat, iconProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,13 +54,25 @@ public class HomeActivity extends AppCompatActivity {
         loadUserData();
         loadRecentMeals();
         setupNavigationCards();
+        setupCustomBottomNavigation();
     }
 
     private void initializeViews() {
         tvWelcome = findViewById(R.id.tvWelcome);
         tvCalorieGoal = findViewById(R.id.tvCalorieGoal);
         rvRecentMeals = findViewById(R.id.rvRecentMeals);
-        bottomNav = findViewById(R.id.bottomNavigation);
+        
+        // Initialize custom bottom navigation
+        View bottomNav = findViewById(R.id.bottomNavigation);
+        tabHome = bottomNav.findViewById(R.id.tab_home);
+        tabBlog = bottomNav.findViewById(R.id.tab_blog);
+        tabChat = bottomNav.findViewById(R.id.tab_chat);
+        tabProfile = bottomNav.findViewById(R.id.tab_profile);
+        
+        iconHome = bottomNav.findViewById(R.id.icon_home);
+        iconBlog = bottomNav.findViewById(R.id.icon_blog);
+        iconChat = bottomNav.findViewById(R.id.icon_chat);
+        iconProfile = bottomNav.findViewById(R.id.icon_profile);
         
         mealsAdapter = new RecentMealsAdapter();
         rvRecentMeals.setLayoutManager(new LinearLayoutManager(this));
@@ -187,23 +204,58 @@ public class HomeActivity extends AppCompatActivity {
             "Daily Goal: %.0f calories", dailyCalories));
     }
 
-    private void setupBottomNavigation() {
-        bottomNav.setSelectedItemId(R.id.home);
-        bottomNav.setOnItemSelectedListener(item -> {
-            int itemId = item.getItemId();
-            if (itemId == R.id.home) {
-                return true;
-            } else if (itemId == R.id.blog) {
-                startActivity(new Intent(this, PostAdapter.class));
-                return true;
-            } else if (itemId == R.id.AIchat) {
-                return true;
-            } else if (itemId == R.id.profile) {
-                startActivity(new Intent(this, Profile.class));
-                return true;
+    private void setupCustomBottomNavigation() {
+        // Set home tab as initially selected
+        setSelectedTab(tabHome, iconHome);
+        
+        // Set click listeners for each tab
+        tabHome.setOnClickListener(v -> {
+            if (!isCurrentActivity(HomeActivity.class)) {
+                setSelectedTab(tabHome, iconHome);
+                // Already in HomeActivity
             }
-            return false;
         });
+        
+        tabBlog.setOnClickListener(v -> {
+            setSelectedTab(tabBlog, iconBlog);
+            navigateToActivity(ArticleActivity.class);
+        });
+        
+        tabChat.setOnClickListener(v -> {
+            setSelectedTab(tabChat, iconChat);
+            // Navigate to Chat - Assume you have a ChatActivity class
+            try {
+                navigateToActivity(Class.forName("com.example.calodiary.ChatActivity"));
+            } catch (ClassNotFoundException e) {
+                Toast.makeText(this, "Chat feature coming soon", Toast.LENGTH_SHORT).show();
+            }
+        });
+        
+        tabProfile.setOnClickListener(v -> {
+            setSelectedTab(tabProfile, iconProfile);
+            navigateToActivity(Profile.class);
+        });
+    }
+
+    private void setSelectedTab(LinearLayout tab, ImageView icon) {
+        // Reset all tabs to unselected state
+        tabHome.setSelected(false);
+        tabBlog.setSelected(false);
+        tabChat.setSelected(false);
+        tabProfile.setSelected(false);
+        
+        iconHome.setColorFilter(getResources().getColor(android.R.color.darker_gray));
+        iconBlog.setColorFilter(getResources().getColor(android.R.color.darker_gray));
+        iconChat.setColorFilter(getResources().getColor(android.R.color.darker_gray));
+        iconProfile.setColorFilter(getResources().getColor(android.R.color.darker_gray));
+        
+        // Set selected tab
+        tab.setSelected(true);
+        icon.setColorFilter(getResources().getColor(R.color.primary));
+    }
+    
+    private boolean isCurrentActivity(Class<?> activityClass) {
+        return getClass().getName().equals(activityClass.getName());
     }
 
     private void setupNavigationCards() {
