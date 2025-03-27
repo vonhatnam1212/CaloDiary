@@ -40,7 +40,7 @@
             android:exported="true" />
         <activity
             android:name=".AdminDashboard"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".Login"
             android:exported="true"/>
@@ -89,6 +89,24 @@
             android:exported="false" />
         <activity
             android:name=".chat.ChatHistoryActivity"
+            android:exported="true" />
+        <activity
+            android:name=".chat.ChatActivity"
+            android:exported="false" />
+        <activity
+            android:name=".post.ai.ListPostAIActivity"
+            android:exported="false" />
+        <activity
+            android:name=".post.ai.ViewDetailPostAIActivity"
+            android:exported="false" />
+        <activity
+            android:name=".post.ai.UpdatePostAIActivity"
+            android:exported="false" />
+        <activity
+            android:name=".post.ai.UploadPostAIActivity"
+            android:exported="false" />
+        <activity
+            android:name=".post.ai.DetailPostAIActivity"
             android:exported="false" />
         <meta-data
             android:name="com.google.android.gms.version"

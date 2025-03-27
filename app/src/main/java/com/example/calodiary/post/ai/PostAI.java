@@ -11,8 +11,9 @@ public class PostAI {
     private String img;
     private Timestamp createdAt;
     private Timestamp updatedAt;
+    private boolean ai;
 
-    public PostAI(String title, String content, String authorId, String status, String img, Timestamp createdAt, Timestamp updatedAt) {
+    public PostAI(String title, String content, String authorId, String status, String img,  boolean ai,Timestamp createdAt, Timestamp updatedAt) {
         this.title = title;
         this.content = content;
         this.authorId = authorId;
@@ -20,9 +21,20 @@ public class PostAI {
         this.img = img;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.ai= ai;
     }
 
     public PostAI() {
+    }
+
+
+    public boolean getai() {
+        return this.ai;
+    }
+
+
+    public void setai(boolean ai) {
+        this.ai = ai;
     }
 
     public String getId() {

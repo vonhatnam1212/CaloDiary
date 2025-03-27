@@ -91,7 +91,7 @@ public class ListPostAIActivity extends AppCompatActivity {
         WorkManager.getInstance(this)
                 .enqueueUniquePeriodicWork(
                         "postCreationWork",
-                        ExistingPeriodicWorkPolicy.REPLACE, // Keep existing work if already scheduled
+                        ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE, // Keep existing work if already scheduled
                         postCreationRequest
                 );
     }
@@ -100,6 +100,7 @@ public class ListPostAIActivity extends AppCompatActivity {
     private void loadPostsFromFirestore() {
         db.collection("posts")
                 .whereEqualTo("status", "pending")
+                .whereEqualTo("ai", true)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -133,5 +134,11 @@ public class ListPostAIActivity extends AppCompatActivity {
             }
         }
         listPostAIAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadPostsFromFirestore();
     }
 }
