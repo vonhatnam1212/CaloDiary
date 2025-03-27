@@ -1,90 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/background">
 
-    <!-- Header -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="Calendar"
+            app:titleTextColor="@color/white"/>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Week Navigation -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/purple_500"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <ImageButton
+            android:id="@+id/btnPreviousWeek"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_arrow_left"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Previous week"
+            android:padding="12dp"
+            android:tint="?attr/colorPrimary"/>
 
         <TextView
-            android:id="@+id/tvCurrentWeek"
-            android:layout_width="match_parent"
+            android:id="@+id/tvSelectedDate"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Tuần: 1-7/1/2024"
-            android:textColor="@color/white"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:textAlignment="center"
             android:textSize="18sp"
             android:textStyle="bold"/>
 
-        <TextView
-            android:id="@+id/tvTargetCalories"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Mục tiêu: 2000 kcal/ngày"
-            android:textColor="@color/white"
-            android:layout_marginTop="8dp"/>
+        <ImageButton
+            android:id="@+id/btnNextWeek"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_arrow_right"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Next week"
+            android:padding="12dp"
+            android:tint="?attr/colorPrimary"/>
     </LinearLayout>
 
-    <!-- Week View -->
-    <HorizontalScrollView
+    <!-- Week Days -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvWeekDays"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollbars="none">
+        android:paddingHorizontal="8dp"
+        android:clipToPadding="false"/>
 
-        <LinearLayout
-            android:id="@+id/weekContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="8dp">
-
-            <!-- Day items will be added here programmatically -->
-
-        </LinearLayout>
-    </HorizontalScrollView>
-
-    <!-- Daily Details -->
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardDayDetails"
+    <!-- Daily Summary -->
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp">
+        android:layout_margin="16dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp">
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/tvTotalCalories"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="16dp"
+            android:textSize="16sp"
+            android:textAlignment="center"/>
+    </com.google.android.material.card.MaterialCardView>
 
-            <TextView
-                android:id="@+id/tvSelectedDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Hôm nay"
-                android:textStyle="bold"
-                android:textSize="18sp"/>
-
-            <TextView
-                android:id="@+id/tvDayCalories"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textSize="16sp"/>
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
-
-    <!-- Meal List -->
-    <ListView
-        android:id="@+id/listDayMeals"
+    <!-- Day Meals -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvDayMeals"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="1dp"/>
+        android:padding="16dp"
+        android:clipToPadding="false"/>
 
-</LinearLayout> 
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
+
+</LinearLayout>

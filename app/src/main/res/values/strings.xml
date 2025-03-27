@@ -2,4 +2,11 @@
     <string name="app_name">CaloDiary</string>
     <string name="click_to_login">Click to login</string>
     <string name="logout">Logout</string>
+    <string-array name="activity_levels">
+        <item>Sedentary (1.2)</item>
+        <item>Lightly Active (1.375)</item>
+        <item>Moderately Active (1.55)</item>
+        <item>Very Active (1.725)</item>
+        <item>Extra Active (1.9)</item>
+    </string-array>
 </resources>

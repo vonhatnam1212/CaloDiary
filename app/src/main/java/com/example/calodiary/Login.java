@@ -133,7 +133,7 @@ public class Login extends AppCompatActivity {
     private void redirectBasedOnRole(String role) {
         Intent intent = "admin".equals(role) ?
                 new Intent(this, AdminDashboard.class) :
-                new Intent(this, Profile.class);
+                new Intent(this, HomeActivity.class);
         Toast.makeText(this, "Đăng nhập thành công với vai trò " + (role.equals("admin") ? "Admin" : "User"), Toast.LENGTH_SHORT).show();
         startActivity(intent);
         finish();
