@@ -1,5 +1,6 @@
 package com.example.calodiary;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -7,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,17 +23,6 @@ public class ArticleActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private PostAdapterHome postAdapter;
     private FirebaseFirestore db;
-    private ImageView btnLike, btnComment, btnSendComment, articleAvatar, articleImage;
-    private TextView txtLikeCount, txtCommentCount, articleUsername, articleContent, commentList;
-    private EditText editComment;
-    private View commentSection;
-    private boolean isLiked = false; // Trạng thái like
-    private int likeCount = 0; // Số lượt thích
-    private ArrayList<String> comments = new ArrayList<>(); // Danh sách bình luận
-
-    public void addSamplePosts() {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,24 +52,17 @@ public class ArticleActivity extends AppCompatActivity {
                         postHomeList.clear();
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             PostHome post = document.toObject(PostHome.class);
-
-                            // Lấy số lượng comment từ collection "comments"
-                            db.collection("comments")
-                                    .whereEqualTo("postId", post.getId())
-                                    .get()
-                                    .addOnCompleteListener(commentTask -> {
-                                        if (commentTask.isSuccessful()) {
-                                            int commentCount = commentTask.getResult().size();
-                                            post.setCommentCount(commentCount);
-                                            postAdapter.notifyDataSetChanged(); // Cập nhật UI
-                                        }
-                                    });
-
                             postHomeList.add(post);
                         }
                         postAdapter.notifyDataSetChanged();
                     }
                 });
     }
+    //phần nào xử lý button điều hướng article dùng dòng này:
+//    CardView cvArticle = findViewById(R.id.cvArticle);
+//        cvArticle.setOnClickListener(v -> {
+//        Intent intent = new Intent(HomeActivity.this, ArticleActivity.class);
+//        startActivity(intent);
+//    });
 
 }
