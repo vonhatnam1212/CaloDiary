@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.calodiary.chat.ChatHistoryActivity;
 import com.example.calodiary.databinding.ActivityProfileBinding;
 import com.example.calodiary.Model.User;
 import com.example.calodiary.utils.FirebaseManager;
@@ -108,12 +109,7 @@ public class Profile extends AppCompatActivity {
         
         tabChat.setOnClickListener(v -> {
             setSelectedTab(tabChat, iconChat);
-            // Navigate to Chat - Assume you have a ChatActivity class
-            try {
-                navigateToActivity(Class.forName("com.example.calodiary.ChatActivity"));
-            } catch (ClassNotFoundException e) {
-                Toast.makeText(this, "Chat feature coming soon", Toast.LENGTH_SHORT).show();
-            }
+            navigateToActivity(ChatHistoryActivity.class);
         });
         
         tabProfile.setOnClickListener(v -> {

@@ -84,6 +84,12 @@
         <activity
             android:name=".MealPlanActivity"
             android:exported="false" />
+        <activity
+            android:name=".ArticleActivity"
+            android:exported="false" />
+        <activity
+            android:name=".chat.ChatHistoryActivity"
+            android:exported="false" />
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
