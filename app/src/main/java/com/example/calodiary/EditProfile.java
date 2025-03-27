@@ -6,13 +6,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.InputType;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.calodiary.databinding.ActivityEditProfileBinding;
-import com.example.calodiary.model.User;
+import com.example.calodiary.Model.User;
 import com.example.calodiary.utils.DateInputFormatter;
 import com.example.calodiary.utils.FirebaseManager;
 import com.example.calodiary.utils.ValidationUtils;

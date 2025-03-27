@@ -1,4 +1,4 @@
-package com.example.calodiary.model;
+package com.example.calodiary.Model;
 
 import java.util.Date;
 import java.util.HashMap;
