@@ -41,7 +41,7 @@ public class SplashActivity extends AppCompatActivity {
             editor.clear();
             editor.apply();
             
-            intent = new Intent(SplashActivity.this, LoginActivity.class);
+            intent = new Intent(SplashActivity.this, Login.class);
         }
         
         // Xóa activity stack cũ
