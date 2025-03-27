@@ -66,6 +66,12 @@ public class CalendarActivity extends AppCompatActivity {
         tvSelectedDate = findViewById(R.id.tvSelectedDate);
         tvTotalCalories = findViewById(R.id.tvTotalCalories);
 
+        // Setup Toolbar
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
+
         // Setup RecyclerViews
         rvWeekDays.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         weekDaysAdapter = new WeekDaysAdapter(new ArrayList<>(), this::onDaySelected);
