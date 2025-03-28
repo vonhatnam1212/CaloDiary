@@ -48,7 +48,7 @@ public class LoginActivity extends AppCompatActivity {
         usernameInput = findViewById(R.id.username_input);
         passwordInput = findViewById(R.id.password_input);
         loginBtn = findViewById(R.id.login_btn);
-//        regisBtn = findViewById(R.id.regis_btn);
+        regisBtn = findViewById(R.id.registerNow);
         fgpBtn = findViewById(R.id.fgp_btn);
     }
 

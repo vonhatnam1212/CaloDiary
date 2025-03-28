@@ -1,14 +1,22 @@
 package com.example.calodiary.chat;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.widget.Toast;
+
+import com.example.calodiary.ArticleActivity;
+import com.example.calodiary.HomeActivity;
+import com.example.calodiary.Profile;
 import com.example.calodiary.R;
 import com.google.firebase.firestore.*;
 
@@ -31,6 +39,7 @@ public class ChatActivity extends AppCompatActivity {
     private EditText inputMessage;
     private Button sendButton;
     private FirebaseFirestore db;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

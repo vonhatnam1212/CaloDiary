@@ -5,60 +5,34 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
-import android.text.TextUtils;
-import android.text.TextWatcher;
-import android.util.Patterns;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.RadioGroup;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.firebase.auth.FirebaseAuth;
+import com.example.calodiary.databinding.ActivityRegisterBinding;
+import com.example.calodiary.Model.User;
+import com.example.calodiary.utils.DateInputFormatter;
+import com.example.calodiary.utils.FirebaseManager;
+import com.example.calodiary.utils.ValidationUtils;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+
 import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 
 public class Register extends AppCompatActivity {
-
-    EditText editTextEmail, editTextPassword, editTextConfirmPassword, editTextFullName,
-            editTextUsername, editTextDob, editTextHeight, editTextWeight;
-    TextView emailError, passwordError, confirmPasswordError, fullNameError, usernameError,
-            dobError, heightError, weightError, genderError;
-    RadioGroup radioGroupGender;
-    Button buttonReg;
-    ImageButton buttonNow;
-    ImageView avatarImage, togglePassword, toggleConfirmPassword, dobPicker;
-    FirebaseAuth mAuth;
-    FirebaseFirestore db;
-    private static final int PICK_IMAGE_REQUEST = 1;
+    private ActivityRegisterBinding binding;
     private Uri imageUri;
     private boolean isPasswordVisible = false;
     private boolean isConfirmPasswordVisible = false;
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+    private FirebaseManager firebaseManager;
 
     @Override
     public void onStart() {
         super.onStart();
-        FirebaseUser currentUser = mAuth.getCurrentUser();
+        FirebaseUser currentUser = FirebaseManager.getInstance().getCurrentUser();
         if (currentUser != null && currentUser.isEmailVerified()) {
-            Intent intent = new Intent(getApplicationContext(), Profile.class);
-            startActivity(intent);
+            startActivity(new Intent(this, Profile.class));
             finish();
         }
     }
@@ -66,189 +40,73 @@ public class Register extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_register);
+        binding = ActivityRegisterBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
-        editTextEmail = findViewById(R.id.email_input);
-        editTextPassword = findViewById(R.id.password_input);
-        editTextConfirmPassword = findViewById(R.id.cfpassword_input);
-        editTextFullName = findViewById(R.id.fullname_input);
-        editTextUsername = findViewById(R.id.username_input);
-        editTextDob = findViewById(R.id.dob_input);
-        editTextHeight = findViewById(R.id.height_input);
-        editTextWeight = findViewById(R.id.weight_input);
-        radioGroupGender = findViewById(R.id.radioGroup);
-        buttonReg = findViewById(R.id.register_btn);
-        buttonNow = findViewById(R.id.loginNow);
-        avatarImage = findViewById(R.id.avatar_image);
-        togglePassword = findViewById(R.id.toggle_password);
-        toggleConfirmPassword = findViewById(R.id.toggle_confirm_password);
-        dobPicker = findViewById(R.id.dob_picker);
+        firebaseManager = FirebaseManager.getInstance();
 
-        emailError = findViewById(R.id.email_error);
-        passwordError = findViewById(R.id.password_error);
-        confirmPasswordError = findViewById(R.id.confirm_password_error);
-        fullNameError = findViewById(R.id.fullname_error);
-        usernameError = findViewById(R.id.username_error);
-        dobError = findViewById(R.id.dob_error);
-        heightError = findViewById(R.id.height_error);
-        weightError = findViewById(R.id.weight_error);
-        genderError = findViewById(R.id.gender_error);
-
-        editTextUsername.setFilters(new InputFilter[]{
+        binding.usernameInput.setFilters(new InputFilter[]{
                 (source, start, end, dest, dstart, dend) -> {
                     for (int i = start; i < end; i++) {
-                        if (Character.isWhitespace(source.charAt(i))) {
-                            return "";
-                        }
+                        if (Character.isWhitespace(source.charAt(i))) return "";
                     }
                     return null;
                 }
         });
 
-        avatarImage.setOnClickListener(v -> {
+        binding.avatarImage.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            startActivityForResult(intent, PICK_IMAGE_REQUEST);
+            startActivityForResult(intent, 1);
         });
 
-        togglePassword.setOnClickListener(v -> {
-            if (isPasswordVisible) {
-                editTextPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                togglePassword.setImageResource(R.drawable.ic_visibility_off);
-                isPasswordVisible = false;
-            } else {
-                editTextPassword.setInputType(InputType.TYPE_CLASS_TEXT);
-                togglePassword.setImageResource(R.drawable.ic_visibility);
-                isPasswordVisible = true;
-            }
-            editTextPassword.setSelection(editTextPassword.getText().length());
-        });
+        binding.togglePassword.setOnClickListener(v -> togglePasswordVisibility());
+        binding.toggleConfirmPassword.setOnClickListener(v -> toggleConfirmPasswordVisibility());
 
-        toggleConfirmPassword.setOnClickListener(v -> {
-            if (isConfirmPasswordVisible) {
-                editTextConfirmPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                toggleConfirmPassword.setImageResource(R.drawable.ic_visibility_off);
-                isConfirmPasswordVisible = false;
-            } else {
-                editTextConfirmPassword.setInputType(InputType.TYPE_CLASS_TEXT);
-                toggleConfirmPassword.setImageResource(R.drawable.ic_visibility);
-                isConfirmPasswordVisible = true;
-            }
-            editTextConfirmPassword.setSelection(editTextConfirmPassword.getText().length());
-        });
+        binding.dobInput.setInputType(InputType.TYPE_CLASS_NUMBER);
+        binding.dobInput.addTextChangedListener(new DateInputFormatter(binding.dobInput));
 
-        editTextDob.setInputType(InputType.TYPE_CLASS_NUMBER);
-        editTextDob.addTextChangedListener(new TextWatcher() {
-            private String previousText = "";
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                previousText = s.toString();
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                String input = s.toString().replaceAll("[^0-9]", "");
-                if (input.length() > 8) {
-                    input = input.substring(0, 8);
-                }
-                String formatted = formatDate(input);
-                if (!formatted.equals(s.toString())) {
-                    editTextDob.removeTextChangedListener(this);
-                    editTextDob.setText(formatted);
-                    editTextDob.setSelection(formatted.length());
-                    editTextDob.addTextChangedListener(this);
-                }
-            }
-
-            private String formatDate(String input) {
-                if (input.length() <= 2) {
-                    return input;
-                } else if (input.length() <= 4) {
-                    return input.substring(0, 2) + "/" + input.substring(2);
-                } else {
-                    return input.substring(0, 2) + "/" + input.substring(2, 4) + "/" + input.substring(4);
-                }
-            }
-        });
-
-        dobPicker.setOnClickListener(v -> showDatePickerDialog());
-
-        buttonNow.setOnClickListener(v -> {
-            Intent intent = new Intent(getApplicationContext(), Login.class);
-            startActivity(intent);
+        binding.dobPicker.setOnClickListener(v -> showDatePickerDialog());
+        binding.backButton.setOnClickListener(v -> {
+            startActivity(new Intent(this, Login.class));
             finish();
         });
 
-        buttonReg.setOnClickListener(v -> {
-            if (validateInputs()) {
-                String email = editTextEmail.getText().toString().trim();
-                String username = editTextUsername.getText().toString().trim();
-                String password = editTextPassword.getText().toString().trim();
-                String fullName = editTextFullName.getText().toString().trim();
-                String dob = editTextDob.getText().toString().trim();
-                String height = editTextHeight.getText().toString().trim();
-                String weight = editTextWeight.getText().toString().trim();
-                String gender = radioGroupGender.getCheckedRadioButtonId() == R.id.radioButton ? "Male" : "Female";
-
-                checkEmailAndUsername(email, username, () -> {
-                    mAuth.createUserWithEmailAndPassword(email, password)
-                            .addOnCompleteListener(task -> {
-                                if (task.isSuccessful()) {
-                                    FirebaseUser user = mAuth.getCurrentUser();
-                                    if (user != null) {
-                                        user.sendEmailVerification()
-                                                .addOnCompleteListener(verifyTask -> {
-                                                    if (verifyTask.isSuccessful()) {
-                                                        Map<String, Object> userData = new HashMap<>();
-                                                        userData.put("email", email);
-                                                        userData.put("fullName", fullName);
-                                                        userData.put("username", username);
-                                                        userData.put("dob", dob);
-                                                        userData.put("height", height);
-                                                        userData.put("weight", weight);
-                                                        userData.put("gender", gender);
-                                                        userData.put("emailVerified", false);
-                                                        userData.put("role", "user");
-
-                                                        db.collection("users").document(user.getUid())
-                                                                .set(userData)
-                                                                .addOnCompleteListener(task1 -> {
-                                                                    if (task1.isSuccessful()) {
-                                                                        Toast.makeText(Register.this, "Đăng ký thành công. Vui lòng kiểm tra email để xác nhận!", Toast.LENGTH_LONG).show();
-                                                                        mAuth.signOut();
-                                                                        Intent intent = new Intent(getApplicationContext(), Login.class);
-                                                                        startActivity(intent);
-                                                                        finish();
-                                                                    } else {
-                                                                        Toast.makeText(Register.this, "Lỗi khi lưu dữ liệu: " + task1.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                                                                    }
-                                                                });
-                                                    } else {
-                                                        Toast.makeText(Register.this, "Không thể gửi email xác nhận: " + verifyTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                                                    }
-                                                });
-                                    }
-                                } else {
-                                    Toast.makeText(Register.this, "Đăng ký thất bại: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                });
-            }
-        });
+        binding.registerBtn.setOnClickListener(v -> registerUser());
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
+        if (requestCode == 1 && resultCode == RESULT_OK && data != null) {
             imageUri = data.getData();
-            avatarImage.setImageURI(imageUri);
+            binding.avatarImage.setImageURI(imageUri);
         }
+    }
+
+    private void togglePasswordVisibility() {
+        if (isPasswordVisible) {
+            binding.passwordInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            binding.togglePassword.setImageResource(R.drawable.ic_visibility_off);
+            isPasswordVisible = false;
+        } else {
+            binding.passwordInput.setInputType(InputType.TYPE_CLASS_TEXT);
+            binding.togglePassword.setImageResource(R.drawable.ic_visibility);
+            isPasswordVisible = true;
+        }
+        binding.passwordInput.setSelection(binding.passwordInput.getText().length());
+    }
+
+    private void toggleConfirmPasswordVisibility() {
+        if (isConfirmPasswordVisible) {
+            binding.cfpasswordInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            binding.toggleConfirmPassword.setImageResource(R.drawable.ic_visibility_off);
+            isConfirmPasswordVisible = false;
+        } else {
+            binding.cfpasswordInput.setInputType(InputType.TYPE_CLASS_TEXT);
+            binding.toggleConfirmPassword.setImageResource(R.drawable.ic_visibility);
+            isConfirmPasswordVisible = true;
+        }
+        binding.cfpasswordInput.setSelection(binding.cfpasswordInput.getText().length());
     }
 
     private void showDatePickerDialog() {
@@ -260,144 +118,64 @@ public class Register extends AppCompatActivity {
         DatePickerDialog datePickerDialog = new DatePickerDialog(this,
                 (view, year1, month1, dayOfMonth) -> {
                     String date = String.format("%02d/%02d/%04d", dayOfMonth, month1 + 1, year1);
-                    editTextDob.setText(date);
+                    binding.dobInput.setText(date);
                 }, year, month, day);
         datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis() - 1000 * 60 * 60 * 24);
         datePickerDialog.show();
     }
 
-    private void checkEmailAndUsername(String email, String username, Runnable onSuccess) {
-        db.collection("users")
-                .whereEqualTo("email", email)
-                .get()
-                .addOnCompleteListener(emailTask -> {
-                    if (emailTask.isSuccessful() && !emailTask.getResult().isEmpty()) {
-                        editTextEmail.setBackgroundResource(R.drawable.error_border);
-                        emailError.setText("Email đã được sử dụng");
-                        Toast.makeText(Register.this, "Email đã được sử dụng!", Toast.LENGTH_SHORT).show();
-                    } else {
-                        db.collection("users")
-                                .whereEqualTo("username", username)
-                                .get()
-                                .addOnCompleteListener(usernameTask -> {
-                                    if (usernameTask.isSuccessful() && !usernameTask.getResult().isEmpty()) {
-                                        editTextUsername.setBackgroundResource(R.drawable.error_border);
-                                        usernameError.setText("Username đã được sử dụng");
-                                        Toast.makeText(Register.this, "Username đã được sử dụng!", Toast.LENGTH_SHORT).show();
-                                    } else {
-                                        onSuccess.run();
+    private void registerUser() {
+        if (validateInputs()) {
+            String email = binding.emailInput.getText().toString().trim();
+            String username = binding.usernameInput.getText().toString().trim();
+            String password = binding.passwordInput.getText().toString().trim();
+
+            firebaseManager.checkEmailAvailability(email, () -> {
+                firebaseManager.checkUsernameAvailability(username, () -> {
+                    firebaseManager.getInstance().mAuth.createUserWithEmailAndPassword(email, password)
+                            .addOnCompleteListener(task -> {
+                                if (task.isSuccessful()) {
+                                    FirebaseUser user = firebaseManager.getCurrentUser();
+                                    if (user != null) {
+                                        user.sendEmailVerification().addOnCompleteListener(verifyTask -> {
+                                            if (verifyTask.isSuccessful()) {
+                                                User userData = new User();
+                                                userData.setUid(user.getUid());
+                                                userData.setEmail(email);
+                                                userData.setFullName(binding.fullnameInput.getText().toString().trim());
+                                                userData.setUsername(username);
+                                                userData.setDob(binding.dobInput.getText().toString().trim());
+                                                userData.setHeight(Float.parseFloat(binding.heightInput.getText().toString().trim()));
+                                                userData.setWeight(Float.parseFloat(binding.weightInput.getText().toString().trim()));
+                                                userData.setGender(binding.radioGroup.getCheckedRadioButtonId() == R.id.radioButton ? "male" : "female");
+                                                userData.setRole("user");
+                                                userData.setEmailVerified(false);
+
+                                                firebaseManager.setUserProfile(user, userData, this, () -> {
+                                                    firebaseManager.signOut();
+                                                    startActivity(new Intent(this, Login.class));
+                                                    finish();
+                                                });
+                                            }
+                                        });
                                     }
-                                });
-                    }
-                });
+                                }
+                            });
+                }, this);
+            }, this);
+        }
     }
 
     private boolean validateInputs() {
         boolean isValid = true;
-        String email = editTextEmail.getText().toString().trim();
-        String password = editTextPassword.getText().toString().trim();
-        String confirmPassword = editTextConfirmPassword.getText().toString().trim();
-        String dob = editTextDob.getText().toString().trim();
-
-        emailError.setText(""); passwordError.setText(""); confirmPasswordError.setText("");
-        fullNameError.setText(""); usernameError.setText(""); dobError.setText("");
-        heightError.setText(""); weightError.setText(""); genderError.setText("");
-        editTextEmail.setBackgroundResource(R.drawable.rounded_corner_text);
-        editTextPassword.setBackgroundResource(R.drawable.rounded_corner_text);
-        editTextConfirmPassword.setBackgroundResource(R.drawable.rounded_corner_text);
-        editTextFullName.setBackgroundResource(R.drawable.rounded_corner_text);
-        editTextUsername.setBackgroundResource(R.drawable.rounded_corner_text);
-        editTextDob.setBackgroundResource(R.drawable.rounded_corner_text);
-        editTextHeight.setBackgroundResource(R.drawable.rounded_corner_text);
-        editTextWeight.setBackgroundResource(R.drawable.rounded_corner_text);
-        radioGroupGender.setBackgroundResource(0);
-
-        if (TextUtils.isEmpty(email) || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            editTextEmail.setBackgroundResource(R.drawable.error_border);
-            emailError.setText("Vui lòng nhập email hợp lệ");
-            isValid = false;
-        }
-
-        if (TextUtils.isEmpty(password)) {
-            editTextPassword.setBackgroundResource(R.drawable.error_border);
-            passwordError.setText("Vui lòng nhập mật khẩu");
-            isValid = false;
-        } else if (password.length() < 6) {
-            editTextPassword.setBackgroundResource(R.drawable.error_border);
-            passwordError.setText("Password phải có tối thiểu 6 ký tự");
-            isValid = false;
-        } else if (!password.equals(confirmPassword)) {
-            editTextConfirmPassword.setBackgroundResource(R.drawable.error_border);
-            confirmPasswordError.setText("Confirm password không đúng với password ở trên");
-            isValid = false;
-        }
-
-        if (TextUtils.isEmpty(editTextFullName.getText().toString().trim())) {
-            editTextFullName.setBackgroundResource(R.drawable.error_border);
-            fullNameError.setText("Vui lòng nhập họ tên");
-            isValid = false;
-        }
-
-        String username = editTextUsername.getText().toString().trim();
-        if (TextUtils.isEmpty(username)) {
-            editTextUsername.setBackgroundResource(R.drawable.error_border);
-            usernameError.setText("Vui lòng nhập tên người dùng");
-            isValid = false;
-        }
-
-        String currentDateStr = dateFormat.format(new Date());
-        try {
-            if (TextUtils.isEmpty(dob) || dob.length() != 10) {
-                editTextDob.setBackgroundResource(R.drawable.error_border);
-                dobError.setText("Vui lòng nhập đúng ngày sinh của bạn");
-                isValid = false;
-            } else {
-                Date dobDate = dateFormat.parse(dob);
-                Date currentDate = dateFormat.parse(currentDateStr);
-                if (dobDate == null || dobDate.compareTo(currentDate) >= 0) {
-                    editTextDob.setBackgroundResource(R.drawable.error_border);
-                    dobError.setText("Vui lòng nhập đúng ngày sinh của bạn");
-                    isValid = false;
-                }
-            }
-        } catch (ParseException e) {
-            editTextDob.setBackgroundResource(R.drawable.error_border);
-            dobError.setText("Định dạng ngày sinh không hợp lệ");
-            isValid = false;
-        }
-
-        try {
-            float heightValue = Float.parseFloat(editTextHeight.getText().toString().trim());
-            if (heightValue <= 0) {
-                editTextHeight.setBackgroundResource(R.drawable.error_border);
-                heightError.setText("Chiều cao phải lớn hơn 0");
-                isValid = false;
-            }
-        } catch (NumberFormatException e) {
-            editTextHeight.setBackgroundResource(R.drawable.error_border);
-            heightError.setText("Vui lòng nhập chiều cao hợp lệ");
-            isValid = false;
-        }
-
-        try {
-            float weightValue = Float.parseFloat(editTextWeight.getText().toString().trim());
-            if (weightValue <= 0) {
-                editTextWeight.setBackgroundResource(R.drawable.error_border);
-                weightError.setText("Cân nặng phải lớn hơn 0");
-                isValid = false;
-            }
-        } catch (NumberFormatException e) {
-            editTextWeight.setBackgroundResource(R.drawable.error_border);
-            weightError.setText("Vui lòng nhập cân nặng hợp lệ");
-            isValid = false;
-        }
-
-        if (radioGroupGender.getCheckedRadioButtonId() == -1) {
-            radioGroupGender.setBackgroundResource(R.drawable.error_border);
-            genderError.setText("Vui lòng chọn giới tính");
-            isValid = false;
-        }
-
+        isValid &= ValidationUtils.validateEmail(binding.emailInput, binding.emailError);
+        isValid &= ValidationUtils.validatePassword(binding.passwordInput, binding.cfpasswordInput, binding.passwordError, binding.confirmPasswordError, true);
+        isValid &= ValidationUtils.validateRequiredField(binding.fullnameInput, binding.fullnameError, "Vui lòng nhập họ tên");
+        isValid &= ValidationUtils.validateRequiredField(binding.usernameInput, binding.usernameError, "Vui lòng nhập tên người dùng");
+        isValid &= ValidationUtils.validateDob(binding.dobInput, binding.dobError);
+        isValid &= ValidationUtils.validateNumberField(binding.heightInput, binding.heightError, "Chiều cao phải lớn hơn 0");
+        isValid &= ValidationUtils.validateNumberField(binding.weightInput, binding.weightError, "Cân nặng phải lớn hơn 0");
+        isValid &= ValidationUtils.validateGender(binding.radioGroup, binding.genderError);
         return isValid;
     }
 }

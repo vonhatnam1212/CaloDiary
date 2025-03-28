@@ -126,7 +126,7 @@ public class UploadPostAIActivity extends AppCompatActivity {
             return;
         }
 
-        PostAI newPost = new PostAI(title, content, authorId, status, imgPath, currentTime, currentTime);
+        PostAI newPost = new PostAI(title, content, authorId, status, imgPath, true,currentTime, currentTime);
         newPost.setId(UUID.randomUUID().toString());
 
         db.collection("posts")

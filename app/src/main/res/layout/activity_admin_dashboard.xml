@@ -28,4 +28,17 @@
         android:text="Logout"
         android:layout_marginTop="16dp" />
 
+    <Button
+        android:id="@+id/crudPostManual"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="crudPostManual"
+        android:layout_marginTop="16dp" />
+    <Button
+        android:id="@+id/postAi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="postAi"
+        android:layout_marginTop="16dp" />
+
 </LinearLayout>

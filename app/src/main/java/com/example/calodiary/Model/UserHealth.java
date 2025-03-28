@@ -1,4 +1,4 @@
-package com.example.calodiary.model;
+package com.example.calodiary.Model;
 
 public class UserHealth {
     private float bmi;

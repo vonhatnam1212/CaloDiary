@@ -17,6 +17,13 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.Query;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,235 +35,394 @@ import java.util.List;
 import java.util.Locale;
 import java.text.SimpleDateFormat;
 
-public class MealPlanActivity extends AppCompatActivity{
-    private TextView tvDailyCalories;
-    private TextView tvRemainingCalories;
-    private ListView listViewMeals;
-    private Button btnAddMeal;
-    
-    private double dailyCalories;
-    private double remainingCalories;
-    private List<Meal> meals;
+import android.widget.SearchView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.appbar.MaterialToolbar;
+import android.content.Intent;
+import com.google.android.material.textfield.TextInputEditText;
+import com.example.calodiary.adapters.MealAdapter;
+import com.example.calodiary.models.Meal;
+import com.google.android.material.chip.ChipGroup;
+import android.text.Editable;
+import android.text.TextWatcher;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import android.util.Log;
+import java.util.HashMap;
+import java.util.Map;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.datepicker.MaterialDatePicker;
+import android.widget.ProgressBar;
+import com.example.calodiary.adapters.MealHistoryAdapter;
+import java.util.Collections;
+
+public class MealPlanActivity extends AppCompatActivity {
+    private FirebaseFirestore db;
+    private String userId;
+    private RecyclerView rvMeals;
     private MealAdapter mealAdapter;
-    private SharedPreferences sharedPreferences;
+    private TextInputEditText etSearch;
+    private ChipGroup chipGroupMealTypes;
+    private List<Meal> allMeals = new ArrayList<>();
+    private ExtendedFloatingActionButton fabAddMeal;
+    private double dailyCalorieGoal = 2000; // Default value
+    private RecyclerView rvMealHistory;
+    private MealHistoryAdapter mealHistoryAdapter;
+    private TextView tvCalorieProgress;
+    private ProgressBar progressCalories;
+    private MaterialButton btnSelectDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_meal_plan);
 
+        db = FirebaseFirestore.getInstance();
+        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
         initializeViews();
-        loadUserData();
-        setupListView();
-        setupClickListeners();
+        setupRecyclerView();
+        loadMeals();
+        setupSearchAndFilters();
+        loadUserCalorieGoal();
+        setupAddMealButton();
     }
 
     private void initializeViews() {
-        tvDailyCalories = findViewById(R.id.tvDailyCalories);
-        tvRemainingCalories = findViewById(R.id.tvRemainingCalories);
-        listViewMeals = findViewById(R.id.listViewMeals);
-        btnAddMeal = findViewById(R.id.btnAddMeal);
+        rvMeals = findViewById(R.id.rvMeals);
+        etSearch = findViewById(R.id.etSearch);
+        chipGroupMealTypes = findViewById(R.id.chipGroupMealTypes);
         
-        sharedPreferences = getSharedPreferences("CaloDiaryPrefs", MODE_PRIVATE);
+        // Setup Toolbar
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
+
+        rvMealHistory = findViewById(R.id.rvMealHistory);
+        tvCalorieProgress = findViewById(R.id.tvCalorieProgress);
+        progressCalories = findViewById(R.id.progressCalories);
+        btnSelectDate = findViewById(R.id.btnSelectDate);
+
+        // Setup RecyclerView
+        rvMealHistory.setLayoutManager(new LinearLayoutManager(this));
+        mealHistoryAdapter = new MealHistoryAdapter();
+        rvMealHistory.setAdapter(mealHistoryAdapter);
+
+        // Setup date selection
+        btnSelectDate.setOnClickListener(v -> showDatePicker());
     }
 
-    private void loadUserData() {
-        dailyCalories = sharedPreferences.getFloat("dailyCalories", 0);
-        remainingCalories = dailyCalories;
-        
-        meals = new ArrayList<>();
-        String mealsJson = sharedPreferences.getString("meals", null);
-        if (mealsJson != null) {
-            try {
-                JSONArray jsonArray = new JSONArray(mealsJson);
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    meals.add(new Meal(
-                        jsonObject.getInt("type"),
-                        jsonObject.getString("name"),
-                        jsonObject.getDouble("calories"),
-                        jsonObject.getDouble("portion")
-                    ));
-                }
-                updateRemainingCalories();
-            } catch (JSONException e) {
-                e.printStackTrace();
+    private void setupRecyclerView() {
+        rvMeals.setLayoutManager(new LinearLayoutManager(this));
+        mealAdapter = new MealAdapter();
+        rvMeals.setAdapter(mealAdapter);
+    }
+
+    private void setupSearchAndFilters() {
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterMeals(s.toString(), getSelectedMealType());
             }
-        }
-        updateCaloriesDisplay();
-    }
 
-    private void setupListView() {
-        mealAdapter = new MealAdapter(meals);
-        listViewMeals.setAdapter(mealAdapter);
-        
-        // Long click to delete
-        listViewMeals.setOnItemLongClickListener((parent, view, position, id) -> {
-            showDeleteDialog(position);
-            return true;
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
+        chipGroupMealTypes.setOnCheckedChangeListener((group, checkedId) -> {
+            String mealType = "";
+            if (checkedId == R.id.chipBreakfast) mealType = "Breakfast";
+            else if (checkedId == R.id.chipLunch) mealType = "Lunch";
+            else if (checkedId == R.id.chipDinner) mealType = "Dinner";
+            else if (checkedId == R.id.chipSnacks) mealType = "Snacks";
+            
+            filterMeals(etSearch.getText().toString(), mealType);
         });
     }
 
-    private void setupClickListeners() {
-        btnAddMeal.setOnClickListener(v -> showAddMealDialog());
+    private String getSelectedMealType() {
+        int checkedId = chipGroupMealTypes.getCheckedChipId();
+        if (checkedId == R.id.chipBreakfast) return "Breakfast";
+        if (checkedId == R.id.chipLunch) return "Lunch";
+        if (checkedId == R.id.chipDinner) return "Dinner";
+        if (checkedId == R.id.chipSnacks) return "Snacks";
+        return "";
+    }
+
+    private void filterMeals(String query, String mealType) {
+        List<Meal> filteredMeals = new ArrayList<>();
+        
+        for (Meal meal : allMeals) {
+            boolean matchesQuery = query.isEmpty() || 
+                meal.getName().toLowerCase().contains(query.toLowerCase());
+            boolean matchesType = mealType.isEmpty() || 
+                meal.getType().equals(mealType);
+            
+            if (matchesQuery && matchesType) {
+                filteredMeals.add(meal);
+            }
+        }
+        
+        mealAdapter.setMeals(filteredMeals);
+    }
+
+    private void loadMeals() {
+        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            .format(new Date());
+
+        showLoading(true);
+
+        db.collection("meals")
+            .whereEqualTo("userId", userId)
+//            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener(queryDocuments -> {
+                List<Meal> meals = new ArrayList<>();
+                int todayCalories = 0;
+                
+                for (DocumentSnapshot doc : queryDocuments) {
+                    Meal meal = doc.toObject(Meal.class);
+                    if (meal != null) {
+                        meal.setId(doc.getId());
+                        meals.add(meal);
+                        
+                        if (today.equals(meal.getDate())) {
+                            todayCalories += meal.getCalories();
+                        }
+                    }
+                }
+                Collections.sort(meals, (m1, m2) ->
+                        Long.compare(m2.getTimestamp(), m1.getTimestamp()));
+                mealAdapter.setMeals(meals);
+                updateCalorieProgress(todayCalories);
+                showLoading(false);
+            })
+            .addOnFailureListener(e -> {
+                Log.e("MealPlanActivity", "Error loading meals", e);
+                Toast.makeText(this, "Error loading meals: " + e.getMessage(), 
+                    Toast.LENGTH_SHORT).show();
+                showLoading(false);
+            });
+    }
+
+    private void loadUserCalorieGoal() {
+        FirebaseFirestore.getInstance().collection("users").document(userId)
+            .get()
+            .addOnSuccessListener(document -> {
+                if (document.exists()) {
+                    User user = document.toObject(User.class);
+                    if (user != null) {
+                        // Assuming you have a method to calculate daily calories
+                        dailyCalorieGoal = calculateDailyCalories(user);
+                    }
+                }
+            });
+    }
+
+    private void setupAddMealButton() {
+        fabAddMeal = findViewById(R.id.fabAddMeal);
+        fabAddMeal.setOnClickListener(v -> showAddMealDialog());
     }
 
     private void showAddMealDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_meal, null);
-        
-        Spinner spinnerMealType = dialogView.findViewById(R.id.spinnerMealType);
-        EditText etMealName = dialogView.findViewById(R.id.etMealName);
-        EditText etCalories = dialogView.findViewById(R.id.etCalories);
-        EditText etPortion = dialogView.findViewById(R.id.etPortion);
+        builder.setView(dialogView);
 
-        // Setup spinner
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-            android.R.layout.simple_spinner_item,
-            new String[]{"Sáng", "Trưa", "Tối", "Bữa phụ"});
+        TextInputEditText etMealName = dialogView.findViewById(R.id.etMealName);
+        TextInputEditText etCalories = dialogView.findViewById(R.id.etCalories);
+        Spinner spinnerMealType = dialogView.findViewById(R.id.spinnerMealType);
+        
+        // Setup meal type spinner
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+            R.array.meal_types, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerMealType.setAdapter(adapter);
 
-        builder.setTitle("Thêm món ăn")
-               .setView(dialogView)
-               .setPositiveButton("Thêm", (dialog, which) -> {
-                   if (validateMealInput(etMealName, etCalories, etPortion)) {
-                       addMeal(
-                           spinnerMealType.getSelectedItemPosition(),
-                           etMealName.getText().toString(),
-                           Double.parseDouble(etCalories.getText().toString()),
-                           Double.parseDouble(etPortion.getText().toString())
-                       );
-                   }
-               })
-               .setNegativeButton("Hủy", null)
-               .show();
+        builder.setTitle("Add New Meal")
+            .setPositiveButton("Save", null) // We'll set this later
+            .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+
+        AlertDialog dialog = builder.create();
+        
+        dialog.setOnShowListener(dialogInterface -> {
+            Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            button.setOnClickListener(view -> {
+                if (validateMealInput(etMealName, etCalories)) {
+                    saveMeal(
+                        etMealName.getText().toString(),
+                        Integer.parseInt(etCalories.getText().toString()),
+                        spinnerMealType.getSelectedItem().toString(),
+                        dialog
+                    );
+                }
+            });
+        });
+
+        dialog.show();
     }
 
-    private void showDeleteDialog(int position) {
-        new AlertDialog.Builder(this)
-            .setTitle("Xóa món ăn")
-            .setMessage("Bạn có chắc muốn xóa món ăn này?")
-            .setPositiveButton("Xóa", (dialog, which) -> {
-                meals.remove(position);
-                saveMeals();
-                mealAdapter.notifyDataSetChanged();
-                updateRemainingCalories();
-                updateCaloriesDisplay();
-            })
-            .setNegativeButton("Hủy", null)
-            .show();
-    }
-
-    private boolean validateMealInput(@NonNull EditText etMealName, @NonNull EditText etCalories, @NonNull EditText etPortion) {
+    private boolean validateMealInput(TextInputEditText etMealName, TextInputEditText etCalories) {
         String name = etMealName.getText().toString().trim();
         String calories = etCalories.getText().toString().trim();
-        String portion = etPortion.getText().toString().trim();
 
         if (name.isEmpty()) {
-            Toast.makeText(this, "Vui lòng nhập tên món ăn", Toast.LENGTH_SHORT).show();
+            etMealName.setError("Please enter meal name");
             return false;
         }
+
         if (calories.isEmpty()) {
-            Toast.makeText(this, "Vui lòng nhập lượng calo", Toast.LENGTH_SHORT).show();
+            etCalories.setError("Please enter calories");
             return false;
         }
-        if (portion.isEmpty()) {
-            Toast.makeText(this, "Vui lòng nhập khẩu phần", Toast.LENGTH_SHORT).show();
+
+        try {
+            int caloriesValue = Integer.parseInt(calories);
+            if (caloriesValue <= 0 || caloriesValue > 5000) {
+                etCalories.setError("Please enter a valid calorie amount (1-5000)");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            etCalories.setError("Please enter a valid number");
             return false;
         }
 
         return true;
     }
 
-    private void addMeal(int type, String name, double calories, double portion) {
-        Meal meal = new Meal(type, name, calories, portion);
-        meals.add(meal);
-        mealAdapter.notifyDataSetChanged();
-        saveMeals();
-        updateRemainingCalories();
-        updateCaloriesDisplay();
-        Toast.makeText(this, "Đã thêm món ăn", Toast.LENGTH_SHORT).show();
+    private void saveMeal(String name, int calories, String type, AlertDialog dialog) {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            .format(new Date());
+
+        Map<String, Object> mealData = new HashMap<>();
+        mealData.put("name", name);
+        mealData.put("type", type);
+        mealData.put("calories", calories);
+        mealData.put("userId", userId);
+        mealData.put("date", date);
+        mealData.put("timestamp", new Date().getTime());
+
+        FirebaseFirestore.getInstance().collection("meals")
+            .add(mealData)
+            .addOnSuccessListener(documentReference -> {
+                Toast.makeText(this, "Meal added successfully", Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+                loadMeals(); // Refresh the list
+            })
+            .addOnFailureListener(e -> {
+                Toast.makeText(this, "Error adding meal: " + e.getMessage(), 
+                    Toast.LENGTH_SHORT).show();
+            });
     }
 
-    private void saveMeals() {
+    private double calculateDailyCalories(User user) {
+        if (user == null) return 0.0;
+
         try {
-            JSONArray jsonArray = new JSONArray();
-            for (Meal meal : meals) {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("type", meal.type);
-                jsonObject.put("name", meal.name);
-                jsonObject.put("calories", meal.calories);
-                jsonObject.put("portion", meal.portion);
-                jsonArray.put(jsonObject);
+            double weight = user.getWeight();
+            double height = user.getHeight();
+            int age = user.getAge();
+            double activityLevel = 1.2; // default value
+            
+            try {
+                String activityLevelStr = user.getActivityLevel();
+                if (activityLevelStr != null && !activityLevelStr.trim().isEmpty()) {
+                    activityLevel = Double.parseDouble(activityLevelStr);
+                }
+            } catch (NumberFormatException e) {
+                Log.e("MealPlanActivity", "Error parsing activity level: " + e.getMessage());
             }
             
-            // Lưu cho ngày hiện tại
-            String today = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                .format(new Date());
-            sharedPreferences.edit()
-                .putString("meals_" + today, jsonArray.toString())
-                .apply();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void updateRemainingCalories() {
-        remainingCalories = dailyCalories;
-        for (Meal meal : meals) {
-            remainingCalories -= meal.calories;
-        }
-    }
-
-    @SuppressLint("DefaultLocale")
-    private void updateCaloriesDisplay() {
-        tvDailyCalories.setText(String.format("Lượng calo cần thiết: %.0f kcal", dailyCalories));
-        tvRemainingCalories.setText(String.format("Còn lại: %.0f kcal", remainingCalories));
-    }
-
-    private class MealAdapter extends ArrayAdapter<Meal> {
-        MealAdapter(List<Meal> meals) {
-            super(MealPlanActivity.this, R.layout.item_meal, meals);
-        }
-
-        @NonNull
-        @SuppressLint("DefaultLocale")
-        @Override
-        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-            if (convertView == null) {
-                convertView = LayoutInflater.from(getContext())
-                    .inflate(R.layout.item_meal, parent, false);
+            // Calculate BMR using the Mifflin-St Jeor Equation
+            double bmr;
+            if ("male".equalsIgnoreCase(user.getGender())) {
+                bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
+            } else {
+                bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161;
             }
-
-            Meal meal = getItem(position);
-            if (meal != null) {
-                TextView tvMealType = convertView.findViewById(R.id.tvMealType);
-                TextView tvMealName = convertView.findViewById(R.id.tvMealName);
-                TextView tvMealCalories = convertView.findViewById(R.id.tvMealCalories);
-
-                String[] mealTypes = {"Bữa sáng", "Bữa trưa", "Bữa tối", "Bữa phụ"};
-                tvMealType.setText(mealTypes[meal.type]);
-                tvMealName.setText(meal.name);
-                tvMealCalories.setText(String.format("%.0f kcal (%.0fg)", 
-                    meal.calories, meal.portion));
-            }
-
-            return convertView;
+            
+            return bmr * activityLevel;
+        } catch (Exception e) {
+            Log.e("MealPlanActivity", "Error calculating calories: " + e.getMessage());
+            return 0.0;
         }
     }
 
-    public static class Meal {
-        int type;
-        String name;
-        double calories;
-        double portion;
+    private void showDatePicker() {
+        MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
+            .setTitleText("Select date")
+            .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+            .build();
 
-        Meal(int type, String name, double calories, double portion) {
-            this.type = type;
-            this.name = name;
-            this.calories = calories;
-            this.portion = portion;
+        datePicker.addOnPositiveButtonClickListener(selection -> {
+            String selectedDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                .format(new Date(selection));
+            loadMealsForDate(selectedDate);
+        });
+
+        datePicker.show(getSupportFragmentManager(), "DATE_PICKER");
+    }
+
+    private void loadMealsForDate(String date) {
+        showLoading(true);
+        
+        db.collection("meals")
+            .whereEqualTo("userId", userId)
+            .whereEqualTo("date", date)
+            .get()
+            .addOnSuccessListener(queryDocuments -> {
+                List<Meal> meals = new ArrayList<>();
+                int totalCalories = 0;
+                
+                for (DocumentSnapshot doc : queryDocuments) {
+                    Meal meal = doc.toObject(Meal.class);
+                    if (meal != null) {
+                        meal.setId(doc.getId());
+                        meals.add(meal);
+                        totalCalories += meal.getCalories();
+                    }
+                }
+                
+                // Sắp xếp locally
+                Collections.sort(meals, (m1, m2) -> 
+                    Long.compare(m2.getTimestamp(), m1.getTimestamp()));
+                
+                mealAdapter.setMeals(meals);
+                updateCalorieProgress(totalCalories);
+                showLoading(false);
+
+                // Log để debug
+                Log.d("MealPlanActivity", "Loaded " + meals.size() + 
+                    " meals for date " + date);
+            })
+            .addOnFailureListener(e -> {
+                Log.e("MealPlanActivity", "Error loading meals for date " + date, e);
+                Toast.makeText(this, "Error loading meals: " + e.getMessage(), 
+                    Toast.LENGTH_SHORT).show();
+                showLoading(false);
+            });
+    }
+
+    private void updateCalorieProgress(int totalCalories) {
+        int progress = (int)((totalCalories * 100.0) / dailyCalorieGoal);
+        progressCalories.setProgress(Math.min(progress, 100));
+
+        tvCalorieProgress.setText(String.format(Locale.getDefault(),
+            "%d/%d cal (%d%%)", totalCalories, (int)dailyCalorieGoal, progress));
+
+        tvCalorieProgress.setTextColor(getResources().getColor(
+            totalCalories >= dailyCalorieGoal ? R.color.goal_met_text : R.color.goal_not_met_text));
+    }
+
+    private void showLoading(boolean show) {
+        if (show) {
+            findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
+        } else {
+            findViewById(R.id.progressBar).setVisibility(View.GONE);
         }
     }
 }

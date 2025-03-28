@@ -5,26 +5,37 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etMealName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Meal Name"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
     <Spinner
         android:id="@+id/spinnerMealType"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"/>
 
-    <EditText
-        android:id="@+id/etMealName"
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Tên món ăn"
-        android:layout_marginBottom="16dp"/>
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
-    <EditText
-        android:id="@+id/etCalories"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Lượng calo (kcal)"
-        android:inputType="numberDecimal"
-        android:layout_marginBottom="16dp"/>
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etCalories"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Calories"
+            android:inputType="number"/>
+    </com.google.android.material.textfield.TextInputLayout>
 
     <EditText
         android:id="@+id/etPortion"

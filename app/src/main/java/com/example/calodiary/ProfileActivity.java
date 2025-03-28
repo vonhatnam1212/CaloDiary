@@ -57,7 +57,7 @@ public class ProfileActivity extends AppCompatActivity {
         editor.apply();
 
         // Chuyển về màn hình đăng nhập
-        Intent intent = new Intent(this, LoginActivity.class);
+        Intent intent = new Intent(this, Login.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();

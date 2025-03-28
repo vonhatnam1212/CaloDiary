@@ -22,6 +22,21 @@
             android:gravity="center_horizontal"
             android:padding="16dp">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="start">
+
+                <ImageButton
+                    android:id="@+id/back_button"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Back to Login"
+                    android:src="@drawable/back_arrow" />
+            </LinearLayout>
+
             <ImageView
                 android:id="@+id/avatar_image"
                 android:layout_width="100dp"
@@ -357,28 +372,6 @@
                 android:text="Register"
                 android:textColor="@color/white"
                 android:textSize="25sp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/glacial_indifference"
-                    android:text="Already have an account? "
-                    android:textColor="@color/black"
-                    android:textSize="15sp" />
-
-                <ImageButton
-                    android:id="@+id/loginNow"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@null"
-                    android:contentDescription="Login now" />
-            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
